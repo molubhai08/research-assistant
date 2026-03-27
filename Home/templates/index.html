@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arxis — AI Research Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --rust: #c94f2c;
+    --amber: #d4943a;
+    --sage: #4a7c6b;
+    --slate: #2c3a4a;
+    --mist: #8a9aaa;
+    --glow: rgba(201, 79, 44, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--rust);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(201,79,44,0.5);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
+  }
+  body:hover .cursor { opacity: 1; }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(245,242,235,0.06);
+    backdrop-filter: blur(12px);
+    background: rgba(10,10,15,0.7);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--paper);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--rust);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1.6); opacity:0.6; }
+  }
+  .nav-links {
+    display: flex; gap: 40px; list-style: none;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--mist);
+  }
+  .nav-links a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--paper); }
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 22px;
+    border: 1px solid var(--rust);
+    color: var(--rust);
+    background: transparent;
+    cursor: none;
+    transition: all 0.25s;
+  }
+  .nav-cta:hover { background: var(--rust); color: var(--paper); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 160px 64px 80px 64px;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative; z-index: 2;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 12px;
+    opacity: 0;
+    animation: fade-up 0.8s 0.2s ease forwards;
+  }
+  .eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--rust);
+  }
+
+  .hero-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(52px, 5.5vw, 82px);
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: var(--paper);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fade-up 0.9s 0.35s ease forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .hero-sub {
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--mist);
+    max-width: 420px;
+    margin-bottom: 52px;
+    opacity: 0;
+    animation: fade-up 0.9s 0.5s ease forwards;
+  }
+
+  .hero-actions {
+    display: flex; align-items: center; gap: 28px;
+    opacity: 0;
+    animation: fade-up 0.9s 0.65s ease forwards;
+  }
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 16px 36px;
+    background: var(--rust);
+    color: var(--paper);
+    border: none;
+    cursor: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .btn-primary:hover::after { transform: translateX(100%); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mist);
+    cursor: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--paper); }
+  .btn-ghost svg { transition: transform 0.2s; }
+  .btn-ghost:hover svg { transform: translateX(4px); }
+
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 64px;
+    padding-top: 40px;
+    border-top: 1px solid rgba(245,242,235,0.08);
+    opacity: 0;
+    animation: fade-up 0.9s 0.8s ease forwards;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--paper);
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mist);
+    margin-top: 4px;
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* HERO RIGHT — Visual */
+  .hero-right {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-right::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 60% 50%, rgba(201,79,44,0.15) 0%, transparent 70%);
+  }
+
+  /* Animated grid */
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,242,235,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,242,235,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+
+  /* Main UI mockup card */
+  .interface-card {
+    width: 520px;
+    background: rgba(22,22,30,0.9);
+    border: 1px solid rgba(245,242,235,0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,79,44,0.1);
+    opacity: 0;
+    animation: card-rise 1.2s 0.8s cubic-bezier(0.23,1,0.32,1) forwards;
+    transform: perspective(1000px) rotateY(-5deg) rotateX(2deg);
+  }
+  @keyframes card-rise {
+    from { opacity:0; transform: perspective(1000px) rotateY(-5deg) rotateX(2deg) translateY(30px); }
+    to   { opacity:1; transform: perspective(1000px) rotateY(-5deg) rotateX(2deg) translateY(0); }
+  }
+
+  .card-titlebar {
+    padding: 12px 16px;
+    background: rgba(10,10,15,0.8);
+    border-bottom: 1px solid rgba(245,242,235,0.06);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .dot { width:10px;height:10px;border-radius:50%; }
+  .dot-r { background:#c94f2c; }
+  .dot-y { background:#d4943a; }
+  .dot-g { background:#4a7c6b; }
+  .card-title-text {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mist); margin-left: 8px;
+  }
+
+  .card-body { padding: 20px; }
+
+  .chat-msg {
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: msg-in 0.5s ease forwards;
+  }
+  .chat-msg:nth-child(1) { animation-delay: 1.4s; }
+  .chat-msg:nth-child(2) { animation-delay: 1.9s; }
+  .chat-msg:nth-child(3) { animation-delay: 2.4s; }
+  .chat-msg:nth-child(4) { animation-delay: 2.9s; }
+  @keyframes msg-in {
+    from { opacity:0; transform: translateX(-8px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .msg-role {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .msg-role.user { color: var(--amber); }
+  .msg-role.ai { color: var(--sage); }
+
+  .msg-bubble {
+    font-size: 11px; line-height: 1.7;
+    padding: 12px 14px;
+    border-left: 2px solid;
+    background: rgba(255,255,255,0.03);
+  }
+  .msg-bubble.user { border-color: var(--amber); color: #c8bfa8; }
+  .msg-bubble.ai { border-color: var(--sage); color: #9ab8a8; }
+
+  .typing-indicator {
+    display: flex; gap: 5px; align-items: center;
+    padding: 12px 14px;
+    border-left: 2px solid var(--sage);
+    background: rgba(255,255,255,0.03);
+    width: fit-content;
+    opacity: 0;
+    animation: msg-in 0.5s 3.4s ease forwards;
+  }
+  .typing-dot {
+    width: 5px; height: 5px; background: var(--sage); border-radius: 50%;
+    animation: typing 1.2s ease-in-out infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing {
+    0%,60%,100% { transform: translateY(0); opacity:0.4; }
+    30% { transform: translateY(-5px); opacity:1; }
+  }
+
+  /* Source pills */
+  .sources-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-top: 10px;
+    opacity: 0;
+    animation: msg-in 0.5s 2.6s ease forwards;
+  }
+  .source-pill {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(74,124,107,0.4);
+    color: var(--sage);
+    border-radius: 100px;
+  }
+
+  /* Card footer */
+  .card-footer {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(245,242,235,0.06);
+    background: rgba(10,10,15,0.5);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .input-fake {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: rgba(245,242,235,0.2);
+    padding: 8px 12px;
+    border: 1px solid rgba(245,242,235,0.08);
+    background: rgba(255,255,255,0.02);
+  }
+  .input-fake::after { content: '|'; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+  .send-btn {
+    width: 32px; height: 32px;
+    background: var(--rust);
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none;
+  }
+
+  /* Floating badges */
+  .badge {
+    position: absolute;
+    background: rgba(22,22,30,0.95);
+    border: 1px solid rgba(245,242,235,0.1);
+    padding: 10px 14px;
+    z-index: 3;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--mist);
+    opacity: 0;
+    animation: badge-in 0.7s ease forwards;
+  }
+  .badge-1 {
+    top: 15%; left: -10%;
+    animation-delay: 2s;
+    border-left: 2px solid var(--rust);
+  }
+  .badge-2 {
+    bottom: 20%; right: -8%;
+    animation-delay: 2.5s;
+    border-left: 2px solid var(--amber);
+  }
+  @keyframes badge-in {
+    from { opacity:0; transform: scale(0.9); }
+    to { opacity:1; transform: scale(1); }
+  }
+  .badge-label {
+    font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    margin-bottom: 4px;
+    color: var(--rust);
+  }
+  .badge-2 .badge-label { color: var(--amber); }
+
+  /* FEATURES SECTION */
+  .section {
+    padding: 120px 64px;
+    position: relative;
+  }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    margin-bottom: 80px;
+    align-items: end;
+  }
+  .section-tag {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--rust); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-tag::before {
+    content:''; display:block;
+    width:24px;height:1px;background:var(--rust);
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 3.5vw, 54px);
+    line-height: 1.1;
+    color: var(--paper);
+  }
+  .section-title em { font-style: italic; color: var(--rust); }
+  .section-desc {
+    font-size: 13px; line-height: 1.9;
+    color: var(--mist);
+    align-self: end;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(245,242,235,0.06);
+  }
+  .feature-card {
+    background: var(--ink);
+    padding: 40px 36px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .feature-card:hover { background: rgba(22,22,30,0.9); }
+  .feature-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--rust);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .feature-card:hover::before { transform: scaleX(1); }
+
+  .feature-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 48px; font-weight: 800;
+    color: rgba(245,242,235,0.04);
+    position: absolute; top: 20px; right: 24px;
+    line-height: 1;
+  }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border: 1px solid rgba(245,242,235,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    color: var(--rust);
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .feature-card:hover .feature-icon {
+    border-color: var(--rust);
+    background: var(--glow);
+  }
+  .feature-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 14px;
+    letter-spacing: -0.2px;
+  }
+  .feature-desc {
+    font-size: 12px; line-height: 1.8;
+    color: var(--mist);
+  }
+
+  /* PIPELINE SECTION */
+  .pipeline-section {
+    padding: 100px 64px;
+    background: rgba(245,242,235,0.02);
+    border-top: 1px solid rgba(245,242,235,0.06);
+    border-bottom: 1px solid rgba(245,242,235,0.06);
+  }
+
+  .pipeline-flow {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-top: 64px;
+    overflow-x: auto;
+  }
+  .pipeline-step {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 120px;
+  }
+  .step-icon {
+    width: 56px; height: 56px;
+    border: 1px solid rgba(245,242,235,0.12);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--paper);
+    background: rgba(22,22,30,0.8);
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .step-icon:hover { border-color: var(--rust); }
+  .step-label {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--mist); margin-top: 12px; text-align: center;
+    line-height: 1.4;
+  }
+  .pipeline-arrow {
+    flex: 1; min-width: 32px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(245,242,235,0.06), rgba(201,79,44,0.4), rgba(245,242,235,0.06));
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .pipeline-arrow::after {
+    content: '';
+    position: absolute; right: -4px; top: -3px;
+    width: 7px; height: 7px;
+    border-right: 1px solid rgba(201,79,44,0.6);
+    border-top: 1px solid rgba(201,79,44,0.6);
+    transform: rotate(45deg);
+  }
+
+  /* TECH STACK */
+  .stack-section { padding: 100px 64px; }
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: rgba(245,242,235,0.06);
+    margin-top: 64px;
+  }
+  .tech-item {
+    background: var(--ink);
+    padding: 32px 24px;
+    text-align: center;
+    transition: background 0.3s;
+  }
+  .tech-item:hover { background: rgba(201,79,44,0.05); }
+  .tech-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: var(--paper); margin-top: 12px; margin-bottom: 6px;
+  }
+  .tech-role {
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mist);
+  }
+  .tech-logo {
+    width: 36px; height: 36px;
+    margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    filter: grayscale(0.3);
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 120px 64px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,79,44,0.1) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .cta-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(44px, 5vw, 72px);
+    line-height: 1.1;
+    color: var(--paper);
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .cta-title em { font-style: italic; color: var(--rust); }
+  .cta-sub {
+    font-size: 13px; line-height: 1.8;
+    color: var(--mist); max-width: 480px; margin: 0 auto 48px;
+    position: relative;
+  }
+  .cta-buttons {
+    display: flex; gap: 16px; justify-content: center;
+    position: relative;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 64px;
+    border-top: 1px solid rgba(245,242,235,0.06);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 18px;
+    color: var(--paper);
+  }
+  .footer-note {
+    font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--mist);
+  }
+  .footer-links {
+    display: flex; gap: 28px; list-style: none;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mist);
+  }
+  .footer-links a { color: inherit; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--rust); }
+
+  /* Divider line */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,242,235,0.08), transparent);
+    margin: 0 64px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--rust); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Arxis
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">Features</a></li>
+    <li><a href="#">Pipeline</a></li>
+    <li><a href="#">Stack</a></li>
+    <li><a href="#">Docs</a></li>
+  </ul>
+  <a href = "{% url 'proj' %}"><button class="nav-cta">Start Research</button></a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">LangGraph × Azure × arXiv</div>
+    <h1 class="hero-title">
+      Intelligence that<br>
+      reads what you<br>
+      <em>actually need</em>
+    </h1>
+    <p class="hero-sub">
+      An agentic research assistant that retrieves, reasons, and responds—routing every query through RAG pipelines, live arXiv searches, and its own knowledge to surface exactly what you're looking for.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary">Launch Assistant</button>
+      <button class="btn-ghost">
+        View Architecture
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">2.3M+</div>
+        <div class="stat-label">arXiv Papers</div>
+      </div>
+      <div>
+        <div class="stat-num">3-way</div>
+        <div class="stat-label">Query Routing</div>
+      </div>
+      <div>
+        <div class="stat-num">Real-time</div>
+        <div class="stat-label">RAG Pipeline</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="grid-bg"></div>
+
+    <!-- Floating badges -->
+    <div class="badge badge-1">
+      <div class="badge-label">Routing Decision</div>
+      <div>→ RAG over project embeddings</div>
+    </div>
+    <div class="badge badge-2">
+      <div class="badge-label">Sources Retrieved</div>
+      <div>4 papers · 98.2% relevance</div>
+    </div>
+
+    <!-- Interface mockup -->
+    <div class="interface-card">
+      <div class="card-titlebar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="card-title-text">Project: Transformer Efficiency Research</div>
+      </div>
+      <div class="card-body">
+        <div class="chat-msg">
+          <div class="msg-role user">Researcher</div>
+          <div class="msg-bubble user">
+            What are the latest approaches to reducing attention complexity in transformers beyond O(n²)?
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="msg-role ai">Arxis Agent · RAG + arXiv</div>
+          <div class="msg-bubble ai">
+            Retrieving from your 12 embedded papers and running a fresh arXiv query...
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="msg-role ai">Sources</div>
+          <div class="sources-row">
+            <span class="source-pill">FlashAttention-3</span>
+            <span class="source-pill">Mamba SSM</span>
+            <span class="source-pill">Ring Attention</span>
+            <span class="source-pill">+3 more</span>
+          </div>
+        </div>
+        <div class="chat-msg">
+          <div class="msg-role ai">Synthesis</div>
+          <div class="msg-bubble ai">
+            Three dominant paradigms have emerged: sparse attention (Longformer, BigBird), linear approximations (Performer, Cosformer), and state-space alternatives (Mamba). Your saved paper on FlashAttention-3 specifically addresses...
+          </div>
+        </div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="input-fake">Ask about your research project</div>
+        <div class="send-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="section">
+  <div class="section-header">
+    <div>
+      <div class="section-tag">Core Capabilities</div>
+      <h2 class="section-title">Built for how<br>researchers <em>think</em></h2>
+    </div>
+    <p class="section-desc">
+      Every decision the agent makes—whether to answer from memory, retrieve from your project, or search arXiv live—happens in milliseconds, invisibly and accurately.
+    </p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L2 7l8 5 8-5-8-5zM2 13l8 5 8-5M2 10l8 5 8-5" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="feature-name">Intelligent Query Routing</div>
+      <div class="feature-desc">LangGraph agent decides in real-time: direct answer, RAG over embeddings, or fresh arXiv search—based on query type and project context.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M10 6v4l3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-name">RAG over Project Papers</div>
+      <div class="feature-desc">Papers are chunked, embedded with Azure OpenAI, and indexed in Azure AI Search with per-project scoping for accurate, contextual retrieval.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="3" y="3" width="6" height="6" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="11" y="3" width="6" height="6" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="3" y="11" width="6" height="6" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="11" y="11" width="6" height="6" stroke="currentColor" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="feature-name">Live arXiv Search</div>
+      <div class="feature-desc">When your project's knowledge isn't enough, the agent fetches, parses, and integrates fresh papers from arXiv on demand—automatically.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">04</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 10h12M4 6h12M4 14h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-name">Persistent Projects</div>
+      <div class="feature-desc">Firestore stores your projects, chat histories, and saved research findings. Every session is stateful and continuous across time.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">05</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-name">Secure Authentication</div>
+      <div class="feature-desc">Firebase Authentication guards every request through the FastAPI backend—your research data stays private and project-scoped.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">06</div>
+      <div class="feature-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 5h14M3 10h10M3 15h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="16" cy="14" r="3" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M18.5 16.5l-1.5-1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="feature-name">Saved Research Findings</div>
+      <div class="feature-desc">Pin key insights from any conversation to your project. Build a living knowledge base that grows with every research session.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section class="pipeline-section">
+  <div style="max-width:900px;margin:0 auto;">
+    <div class="section-tag" style="justify-content:center;">Agent Pipeline</div>
+    <h2 class="section-title" style="text-align:center;font-family:'Instrument Serif',serif;font-size:clamp(32px,3vw,48px);color:var(--paper);line-height:1.1;margin-top:12px;">
+      From query to insight,<br><em>in one agentic pass</em>
+    </h2>
+  </div>
+  <div class="pipeline-flow" style="margin-top:72px;">
+    <div class="pipeline-step">
+      <div class="step-icon" style="border-color:rgba(201,79,44,0.3);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 11h14M4 7h14M4 15h10" stroke="#c94f2c" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="step-label">User<br>Query</div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-step">
+      <div class="step-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="4" y="4" width="14" height="14" stroke="var(--paper)" stroke-width="1.2"/>
+          <path d="M8 11l2 2 4-4" stroke="var(--paper)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="step-label">LangGraph<br>Router</div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-step">
+      <div class="step-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="7" stroke="var(--amber)" stroke-width="1.2"/>
+          <path d="M11 7v4l3 3" stroke="var(--amber)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="step-label">Azure AI<br>Search RAG</div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-step">
+      <div class="step-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 11h3M11 4v3M18 11h-3M11 18v-3" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="11" cy="11" r="4" stroke="var(--sage)" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="step-label">arXiv<br>Live Search</div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-step">
+      <div class="step-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M6 8h10M6 12h6" stroke="var(--paper)" stroke-width="1.2" stroke-linecap="round"/>
+          <rect x="3" y="4" width="16" height="14" rx="1" stroke="var(--paper)" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="step-label">Synthesized<br>Response</div>
+    </div>
+    <div class="pipeline-arrow"></div>
+    <div class="pipeline-step">
+      <div class="step-icon" style="border-color:rgba(74,124,107,0.4);">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 6h14M4 11h14M4 16h14" stroke="var(--sage)" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M17 11l3-3v6l-3-3z" fill="var(--sage)"/>
+        </svg>
+      </div>
+      <div class="step-label">Firestore<br>Persist</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="stack-section">
+  <div class="section-tag">Technology Stack</div>
+  <h2 class="section-title" style="font-family:'Instrument Serif',serif;font-size:clamp(32px,3vw,48px);color:var(--paper);line-height:1.1;margin-top:12px;margin-bottom:0;">
+    Cloud-native from<br><em>ground up</em>
+  </h2>
+  <div class="tech-grid">
+    <div class="tech-item">
+      <div class="tech-logo">🕸️</div>
+      <div class="tech-name">LangGraph</div>
+      <div class="tech-role">Agentic Routing</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-logo">⚡</div>
+      <div class="tech-name">FastAPI</div>
+      <div class="tech-role">Backend API</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-logo">☁️</div>
+      <div class="tech-name">Azure OpenAI</div>
+      <div class="tech-role">Embeddings & LLM</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-logo">🔍</div>
+      <div class="tech-name">Azure AI Search</div>
+      <div class="tech-role">Vector Index</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-logo">🔥</div>
+      <div class="tech-name">Firebase</div>
+      <div class="tech-role">Auth + Firestore</div>
+    </div>
+    <div class="tech-item">
+      <div class="tech-logo">📄</div>
+      <div class="tech-name">arXiv API</div>
+      <div class="tech-role">Paper Retrieval</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-title">Your research,<br><em>amplified</em></h2>
+  <p class="cta-sub">Stop searching. Start understanding. Arxis routes every question to the right source so your thinking stays uninterrupted.</p>
+  <div class="cta-buttons">
+    <button class="btn-primary" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:16px 40px;background:var(--rust);color:var(--paper);border:none;cursor:none;">
+      Begin Your First Project
+    </button>
+    <button class="nav-cta" style="padding:16px 32px;">Read the Docs</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Arxis</div>
+  <ul class="footer-links">
+    <li><a href="#">GitHub</a></li>
+    <li><a href="#">API</a></li>
+    <li><a href="#">Privacy</a></li>
+  </ul>
+  <div class="footer-note">Built with LangGraph × Azure × Firebase</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top = my - 6 + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('button, a, .feature-card, .tech-item').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      ring.style.transform = 'scale(1.5)';
+      ring.style.borderColor = 'rgba(201,79,44,0.8)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.transform = 'scale(1)';
+      ring.style.borderColor = 'rgba(201,79,44,0.5)';
+    });
+  });
+
+  // Intersection observer for scroll animations
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.feature-card, .tech-item, .pipeline-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

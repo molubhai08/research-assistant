@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ project.name }} — Arxis Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --rust: #c94f2c;
+    --amber: #d4943a;
+    --sage: #4a7c6b;
+    --slate: #2c3a4a;
+    --mist: #8a9aaa;
+    --glow: rgba(201, 79, 44, 0.12);
+    --panel: rgba(16, 16, 22, 0.95);
+    --border: rgba(245,242,235,0.07);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    cursor: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Cursor */
+  .cursor { width:10px;height:10px;background:var(--rust);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transition:transform 0.15s ease;mix-blend-mode:screen; }
+  .cursor-ring { width:32px;height:32px;border:1px solid rgba(201,79,44,0.45);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transition:all 0.25s cubic-bezier(0.23,1,0.32,1); }
+
+  /* Noise */
+  body::before {
+    content:'';position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:1000;opacity:0.3;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+  .topbar-left { display:flex;align-items:center;gap:18px; }
+  .logo {
+    font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+    color:var(--paper);display:flex;align-items:center;gap:8px;
+    text-decoration:none;
+  }
+  .logo-dot { width:7px;height:7px;background:var(--rust);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:0.6} }
+
+  .breadcrumb {
+    display:flex;align-items:center;gap:8px;
+    font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mist);
+  }
+  .breadcrumb-sep { color:rgba(138,154,170,0.4); }
+  .breadcrumb-current { color:var(--paper); }
+
+  .topbar-right { display:flex;align-items:center;gap:16px; }
+  .status-pill {
+    display:flex;align-items:center;gap:6px;
+    font-size:9px;letter-spacing:0.15em;text-transform:uppercase;
+    color:var(--sage);padding:5px 12px;
+    border:1px solid rgba(74,124,107,0.3);
+  }
+  .status-dot { width:5px;height:5px;background:var(--sage);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite; }
+  .icon-btn {
+    width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--border);color:var(--mist);cursor:none;
+    transition:all 0.2s;background:transparent;
+  }
+  .icon-btn:hover { border-color:var(--rust);color:var(--rust); }
+
+  /* ── WORKSPACE ── */
+  .workspace {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: rgba(10,10,15,0.6);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+
+  .sidebar-label {
+    font-size: 9px;letter-spacing:0.22em;text-transform:uppercase;
+    color:rgba(138,154,170,0.45);padding:0 20px 12px;
+  }
+
+  .nav-item {
+    display:flex;align-items:center;gap:12px;
+    padding:12px 20px;
+    font-size:11px;letter-spacing:0.06em;
+    color:var(--mist);cursor:none;
+    transition:all 0.2s;
+    border-left:2px solid transparent;
+    position:relative;
+    user-select:none;
+  }
+  .nav-item:hover { color:var(--paper);background:rgba(245,242,235,0.03); }
+  .nav-item.active {
+    color:var(--paper);
+    border-left-color:var(--rust);
+    background:rgba(201,79,44,0.06);
+  }
+  .nav-item.active .nav-icon { color:var(--rust); }
+  .nav-icon { color:inherit;transition:color 0.2s;flex-shrink:0; }
+  .nav-badge {
+    margin-left:auto;font-size:9px;
+    background:rgba(201,79,44,0.2);color:var(--rust);
+    padding:2px 7px;letter-spacing:0.08em;
+  }
+
+  .sidebar-divider {
+    height:1px;background:var(--border);margin:16px 20px;
+  }
+
+  .sidebar-meta {
+    margin-top:auto;padding:16px 20px;
+    border-top:1px solid var(--border);
+  }
+  .meta-label { font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(138,154,170,0.45);margin-bottom:8px; }
+  .meta-value { font-size:11px;color:var(--mist);line-height:1.6; }
+  .meta-value strong { color:var(--paper);font-weight:400; }
+
+  /* ── PANELS ── */
+  .panels {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel {
+    position:absolute;inset:0;
+    display:none;
+    flex-direction:column;
+    opacity:0;
+    transform:translateY(8px);
+    transition:opacity 0.3s ease, transform 0.3s ease;
+  }
+  .panel.active {
+    display:flex;
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* Panel header */
+  .panel-header {
+    padding:20px 32px 16px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;justify-content:space-between;
+    flex-shrink:0;
+  }
+  .panel-title {
+    font-family:'Syne',sans-serif;font-size:15px;font-weight:700;
+    color:var(--paper);display:flex;align-items:center;gap:10px;
+  }
+  .panel-title-icon { color:var(--rust); }
+  .panel-sub { font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mist);margin-top:3px; }
+  .panel-actions { display:flex;gap:8px; }
+
+  .btn-sm {
+    font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+    padding:7px 16px;border:1px solid var(--border);
+    color:var(--mist);background:transparent;cursor:none;
+    transition:all 0.2s;
+  }
+  .btn-sm:hover { border-color:var(--rust);color:var(--rust); }
+  .btn-sm.primary { background:var(--rust);border-color:var(--rust);color:var(--paper); }
+  .btn-sm.primary:hover { background:transparent;color:var(--rust); }
+
+  /* ── CHAT PANEL ── */
+  .chat-messages {
+    flex:1;overflow-y:auto;padding:28px 32px;
+    display:flex;flex-direction:column;gap:20px;
+    scrollbar-width:thin;scrollbar-color:var(--rust) transparent;
+  }
+  .chat-messages::-webkit-scrollbar { width:3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background:var(--rust); }
+
+  .message { display:flex;flex-direction:column;gap:6px;max-width:720px; }
+  .message.user { align-self:flex-end; }
+  .message.ai { align-self:flex-start; }
+
+  .msg-meta {
+    font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+    display:flex;align-items:center;gap:8px;
+  }
+  .message.user .msg-meta { justify-content:flex-end;color:var(--amber); }
+  .message.ai .msg-meta { color:var(--sage); }
+
+  .msg-body {
+    font-size:12px;line-height:1.75;
+    padding:14px 18px;
+    border:1px solid;
+  }
+  .message.user .msg-body {
+    border-color:rgba(212,148,58,0.2);
+    background:rgba(212,148,58,0.05);
+    color:#c8bfa8;
+    border-left:2px solid var(--amber);
+  }
+  .message.ai .msg-body {
+    border-color:rgba(74,124,107,0.2);
+    background:rgba(74,124,107,0.05);
+    color:#9ab8a8;
+    border-left:2px solid var(--sage);
+  }
+
+  .sources-strip {
+    display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;
+  }
+  .source-tag {
+    font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+    padding:3px 9px;border:1px solid rgba(74,124,107,0.35);color:var(--sage);
+  }
+
+  .typing-row {
+    display:flex;align-items:center;gap:6px;
+    padding:14px 18px;
+    border:1px solid rgba(74,124,107,0.2);
+    border-left:2px solid var(--sage);
+    background:rgba(74,124,107,0.05);
+    width:fit-content;
+  }
+  .typing-dot { width:5px;height:5px;background:var(--sage);border-radius:50%;animation:bounce 1.2s ease-in-out infinite; }
+  .typing-dot:nth-child(2){animation-delay:0.2s}
+  .typing-dot:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-5px);opacity:1} }
+
+  .chat-input-area {
+    padding:16px 32px 20px;
+    border-top:1px solid var(--border);
+    display:flex;gap:10px;align-items:flex-end;
+    flex-shrink:0;
+  }
+  .chat-input-wrap { flex:1;position:relative; }
+  .chat-input {
+    width:100%;font-family:'DM Mono',monospace;font-size:12px;
+    padding:13px 16px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--border);
+    color:var(--paper);resize:none;outline:none;
+    transition:border-color 0.2s;
+    scrollbar-width:none;
+    line-height:1.6;
+  }
+  .chat-input:focus { border-color:rgba(201,79,44,0.4); }
+  .chat-input::placeholder { color:rgba(138,154,170,0.35); }
+  .send-btn {
+    width:44px;height:44px;background:var(--rust);border:none;cursor:none;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:opacity 0.2s;
+  }
+  .send-btn:hover { opacity:0.85; }
+  .input-hint {
+    font-size:9px;letter-spacing:0.1em;text-transform:uppercase;
+    color:rgba(138,154,170,0.3);margin-top:6px;
+  }
+
+  /* ── PAPERS PANEL ── */
+  .papers-body { flex:1;overflow-y:auto;padding:24px 32px;scrollbar-width:thin;scrollbar-color:var(--rust) transparent; }
+  .papers-body::-webkit-scrollbar{width:3px}
+  .papers-body::-webkit-scrollbar-thumb{background:var(--rust)}
+
+  .papers-grid {
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:1px;background:var(--border);
+  }
+
+  .paper-card {
+    background:var(--ink);padding:24px;
+    position:relative;overflow:hidden;
+    transition:background 0.25s;cursor:none;
+  }
+  .paper-card:hover { background:rgba(16,16,22,0.98); }
+  .paper-card::before {
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:var(--rust);transform:scaleX(0);transform-origin:left;
+    transition:transform 0.35s ease;
+  }
+  .paper-card:hover::before { transform:scaleX(1); }
+
+  .paper-idx {
+    font-family:'Syne',sans-serif;font-size:36px;font-weight:800;
+    color:rgba(245,242,235,0.04);position:absolute;top:12px;right:16px;line-height:1;
+  }
+  .paper-tag {
+    font-size:9px;letter-spacing:0.18em;text-transform:uppercase;
+    color:var(--rust);margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .paper-tag::before { content:'';width:16px;height:1px;background:var(--rust);display:block; }
+  .paper-title {
+    font-family:'Instrument Serif',serif;font-size:16px;line-height:1.35;
+    color:var(--paper);margin-bottom:10px;
+  }
+  .paper-excerpt {
+    font-size:11px;line-height:1.7;color:var(--mist);
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    margin-bottom:16px;
+  }
+  .paper-meta {
+    display:flex;gap:16px;align-items:center;
+    font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(138,154,170,0.5);
+  }
+  .paper-actions {
+    display:flex;gap:6px;margin-top:14px;
+  }
+
+  .empty-state {
+    text-align:center;padding:80px 32px;
+  }
+  .empty-icon { font-size:40px;margin-bottom:20px;opacity:0.3; }
+  .empty-title {
+    font-family:'Instrument Serif',serif;font-size:24px;color:rgba(245,242,235,0.4);
+    margin-bottom:10px;
+  }
+  .empty-sub { font-size:11px;color:var(--mist);line-height:1.7;max-width:320px;margin:0 auto 28px; }
+
+  /* ── NOTES PANEL ── */
+  .notes-body { flex:1;overflow-y:auto;padding:24px 32px;scrollbar-width:thin;scrollbar-color:var(--rust) transparent; }
+  .notes-body::-webkit-scrollbar{width:3px}
+  .notes-body::-webkit-scrollbar-thumb{background:var(--rust)}
+
+  .notes-editor-wrap {
+    border:1px solid var(--border);overflow:hidden;
+  }
+  .notes-toolbar {
+    display:flex;align-items:center;gap:4px;padding:10px 14px;
+    border-bottom:1px solid var(--border);background:rgba(10,10,15,0.6);
+    flex-wrap:wrap;gap:2px;
+  }
+  .tool-btn {
+    width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+    border:none;background:transparent;color:var(--mist);cursor:none;
+    font-size:11px;font-family:'DM Mono',monospace;font-weight:500;
+    transition:all 0.15s;border-radius:1px;
+  }
+  .tool-btn:hover { background:rgba(201,79,44,0.1);color:var(--rust); }
+  .tool-sep { width:1px;height:20px;background:var(--border);margin:0 6px; }
+
+  .notes-editor {
+    width:100%;min-height:360px;
+    font-family:'DM Mono',monospace;font-size:12px;line-height:1.85;
+    padding:24px 28px;
+    background:rgba(255,255,255,0.015);
+    border:none;color:var(--paper);outline:none;resize:none;
+    scrollbar-width:none;
+  }
+  .notes-editor::placeholder { color:rgba(138,154,170,0.25); }
+
+  .notes-saved-label {
+    font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--sage);display:flex;align-items:center;gap:6px;padding:10px 14px;
+    border-top:1px solid var(--border);background:rgba(74,124,107,0.04);
+  }
+  .saved-dot { width:5px;height:5px;background:var(--sage);border-radius:50%; }
+
+  .pinned-section { margin-top:28px; }
+  .pinned-label {
+    font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(138,154,170,0.45);
+    margin-bottom:16px;display:flex;align-items:center;gap:10px;
+  }
+  .pinned-label::after { content:'';flex:1;height:1px;background:var(--border); }
+
+  .pinned-grid { display:flex;flex-direction:column;gap:8px; }
+  .pinned-item {
+    padding:14px 16px;
+    border:1px solid var(--border);border-left:2px solid var(--amber);
+    background:rgba(212,148,58,0.03);
+    font-size:11px;line-height:1.65;color:var(--mist);
+    transition:border-color 0.2s;cursor:none;
+    display:flex;gap:12px;justify-content:space-between;align-items:flex-start;
+  }
+  .pinned-item:hover { border-color:rgba(212,148,58,0.4); }
+  .pin-icon { color:var(--amber);flex-shrink:0;margin-top:2px; }
+  .pin-del {
+    background:none;border:none;color:rgba(138,154,170,0.3);cursor:none;
+    font-size:14px;line-height:1;flex-shrink:0;padding:0;
+    transition:color 0.2s;
+  }
+  .pin-del:hover { color:var(--rust); }
+
+  /* Scroll animations */
+  @keyframes panel-in {
+    from{opacity:0;transform:translateY(10px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+
+  /* ── Markdown in messages ── */
+  .msg-body p { margin: 0 0 8px; }
+  .msg-body p:last-child { margin-bottom: 0; }
+  .msg-body ul, .msg-body ol { padding-left: 18px; margin: 0 0 8px; }
+  .msg-body li { margin-bottom: 3px; }
+  .msg-body code { background: rgba(255,255,255,0.07); padding: 1px 5px; font-size: 11px; }
+  .msg-body pre { background: rgba(255,255,255,0.05); padding: 10px 14px; overflow-x: auto; margin: 8px 0; }
+  .msg-body pre code { background: none; padding: 0; }
+  .msg-body strong { color: var(--paper); font-weight: 500; }
+  .msg-body h1,.msg-body h2,.msg-body h3 { font-family:'Syne',sans-serif; color:var(--paper); margin: 10px 0 6px; }
+  .msg-body blockquote { border-left: 2px solid var(--sage); padding-left: 10px; color: var(--mist); margin: 6px 0; }
+
+  /* ── Agent trace ── */
+  .agent-trace { margin-bottom: 10px; }
+  .trace-toggle {
+    font-size:9px;letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--amber);cursor:pointer;user-select:none;margin-bottom:4px;
+  }
+  .trace-toggle:hover { color:var(--paper); }
+  .trace-body { display:none;flex-direction:column;gap:3px;padding:8px 10px;border-left:2px solid rgba(212,148,58,0.3); }
+  .trace-body.open { display:flex; }
+  .trace-line { font-size:10px;color:rgba(138,154,170,0.7);line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="/" class="logo">
+      <div class="logo-dot"></div>
+      Arxis
+    </a>
+    <div class="breadcrumb">
+      <span class="breadcrumb-sep">/</span>
+      <span>Projects</span>
+      <span class="breadcrumb-sep">/</span>
+      <span class="breadcrumb-current">{% if project %}{{ project.name }}{% else %}Workspace{% endif %}</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Agent Online
+    </div>
+    <button class="icon-btn" title="Settings">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="2" stroke="currentColor" stroke-width="1.1"/>
+        <path d="M7 1v1M7 12v1M1 7h1M12 7h1M2.5 2.5l.7.7M10.8 10.8l.7.7M2.5 11.5l.7-.7M10.8 3.2l.7-.7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- WORKSPACE -->
+<div class="workspace">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Workspace</div>
+
+    <div class="nav-item active" data-panel="chat" onclick="switchPanel('chat', this)">
+      <span class="nav-icon">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M2 2h11v9H8l-3 2V11H2V2z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M5 6h5M5 8h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Chat
+      <span class="nav-badge">AI</span>
+    </div>
+
+    <div class="nav-item" data-panel="papers" onclick="switchPanel('papers', this)">
+      <span class="nav-icon">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <path d="M3 1h7l3 3v10H3V1z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/>
+          <path d="M9 1v3h3" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M5 7h5M5 9h5M5 11h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Papers
+      <span class="nav-badge" id="paper-count">0</span>
+    </div>
+
+    <div class="nav-item" data-panel="notes" onclick="switchPanel('notes', this)">
+      <span class="nav-icon">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <rect x="2" y="1" width="11" height="13" rx="1" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M5 5h5M5 7h5M5 9h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Notes
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-meta">
+      <div class="meta-label">Project</div>
+      <div class="meta-value">
+        <strong>{% if project %}{{ project.name }}{% else %}—{% endif %}</strong>
+      </div>
+      {% if project.papers %}
+      <div class="meta-value" style="margin-top:8px;font-size:10px;">
+        {{ project.papers|truncatechars:60 }}
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- PANELS -->
+  <div class="panels">
+
+    <!-- ── CHAT PANEL ── -->
+    <div class="panel active" id="panel-chat">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <span class="panel-title-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M2 2h12v10H9l-3 2v-2H2V2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            Research Chat
+          </div>
+          <div class="panel-sub">RAG · arXiv · LangGraph Agent</div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-sm">Clear History</button>
+          <button class="btn-sm primary">New Thread</button>
+        </div>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <!-- System welcome -->
+        <div class="message ai">
+          <div class="msg-meta">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1"/>
+              <path d="M5 3v2l1.5 1.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+            Arxis Agent · Ready
+          </div>
+          <div class="msg-body">
+            {% if project %}
+            Project <strong style="color:var(--paper)">{{ project.name }}</strong> loaded. I have access to your embedded papers and can search arXiv live. What would you like to explore?
+            {% else %}
+            Workspace ready. Ask me anything about your research project—I'll route your query through RAG, live arXiv search, or answer directly.
+            {% endif %}
+          </div>
+          {% if project.papers %}
+          <div class="sources-strip">
+            <span class="source-tag">Project RAG Active</span>
+            <span class="source-tag">arXiv Search On</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div style="flex:1;">
+          <textarea
+            class="chat-input"
+            id="chat-input"
+            rows="1"
+            placeholder="Ask about your research... (Enter to send, Shift+Enter for newline)"
+          ></textarea>
+          <div class="input-hint">LangGraph routes to RAG, arXiv, or direct answer</div>
+        </div>
+        <button class="send-btn" onclick="sendMessage()">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── PAPERS PANEL ── -->
+    <div class="panel" id="panel-papers">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <span class="panel-title-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 1h7l4 4v10H3V1z" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M9 1v4h4" stroke="currentColor" stroke-width="1.2"/>
+              </svg>
+            </span>
+            Paper Collection
+          </div>
+          <div class="panel-sub">arXiv · Embedded · Indexed</div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-sm" onclick="refreshArxiv()">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" style="display:inline;margin-right:5px;">
+              <path d="M9 2A5 5 0 112 6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+              <path d="M9 2v3H6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+            </svg>
+            Fetch arXiv
+          </button>
+          <button class="btn-sm primary">Upload PDF</button>
+        </div>
+      </div>
+
+      <div class="papers-body" id="papers-body">
+        {% if project.papers and project.papers != '' %}
+        <div class="papers-grid" id="papers-grid">
+          <!-- Populated by JS from project.papers -->
+        </div>
+        {% else %}
+        <div class="empty-state" id="papers-empty">
+          <div class="empty-icon">📄</div>
+          <div class="empty-title">No papers yet</div>
+          <div class="empty-sub">Upload PDFs or fetch from arXiv to build your project's knowledge base. Papers are chunked and embedded automatically.</div>
+          <button class="btn-sm primary" style="padding:10px 24px;">Fetch from arXiv</button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ── NOTES PANEL ── -->
+    <div class="panel" id="panel-notes">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">
+            <span class="panel-title-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="1" width="12" height="14" rx="1" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M5 6h6M5 9h6M5 12h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Research Notes
+          </div>
+          <div class="panel-sub">Markdown · Auto-save · Pinned Findings</div>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-sm" onclick="exportNotes()">Export .md</button>
+          <button class="btn-sm primary" id="save-btn" onclick="saveNotes()">Save Notes</button>
+        </div>
+      </div>
+
+      <div class="notes-body">
+        <div class="notes-editor-wrap">
+          <div class="notes-toolbar">
+            <button class="tool-btn" title="Bold" onclick="wrapText('**','**')"><strong>B</strong></button>
+            <button class="tool-btn" title="Italic" onclick="wrapText('*','*')"><em>I</em></button>
+            <button class="tool-btn" title="Code" onclick="wrapText('`','`')">{ }</button>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" title="H1" onclick="wrapText('# ','')">H1</button>
+            <button class="tool-btn" title="H2" onclick="wrapText('## ','')">H2</button>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" title="Bullet" onclick="wrapText('- ','')">—</button>
+            <button class="tool-btn" title="Quote" onclick="wrapText('> ','')">❝</button>
+            <div class="tool-sep"></div>
+            <button class="tool-btn" title="Link" onclick="insertLink()">🔗</button>
+          </div>
+          <textarea
+            class="notes-editor"
+            id="notes-editor"
+            placeholder="Start writing your research notes...&#10;&#10;Markdown supported. Notes are auto-saved every 30 seconds."
+          >{% if project.proj_notes %}{{ project.proj_notes }}{% endif %}</textarea>
+          <div class="notes-saved-label" id="save-status">
+            <div class="saved-dot"></div>
+            All changes saved
+          </div>
+        </div>
+
+        <div class="pinned-section">
+          <div class="pinned-label">Pinned Findings</div>
+          <div class="pinned-grid" id="pinned-grid">
+            <div class="pinned-item">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" class="pin-icon" style="margin-top:1px;flex-shrink:0">
+                <path d="M6.5 1l1.5 3.5L12 5l-3 3 .7 4L6.5 10 3.3 12 4 8 1 5l4-.5L6.5 1z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/>
+              </svg>
+              <span style="flex:1;">Pinned insights from chat will appear here. Click the pin icon on any AI response to save it.</span>
+              <button class="pin-del" onclick="this.closest('.pinned-item').remove()">×</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panels -->
+</div><!-- /workspace -->
+
+<script>
+  // ── Cursor ──
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX;my=e.clientY;
+    cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';
+  });
+  (function animateRing(){
+    rx+=(mx-rx-16)*0.12;ry+=(my-ry-16)*0.12;
+    ring.style.left=rx+'px';ring.style.top=ry+'px';
+    requestAnimationFrame(animateRing);
+  })();
+  document.querySelectorAll('button,a,.nav-item,.paper-card,.pinned-item').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{cursor.style.transform='scale(2)';ring.style.transform='scale(1.4)';ring.style.borderColor='rgba(201,79,44,0.8)';});
+    el.addEventListener('mouseleave',()=>{cursor.style.transform='scale(1)';ring.style.transform='scale(1)';ring.style.borderColor='rgba(201,79,44,0.45)';});
+  });
+
+  // ── Panel switching ──
+  function switchPanel(name, el) {
+    document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display='none'; });
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const target = document.getElementById('panel-'+name);
+    target.style.display='flex';
+    requestAnimationFrame(()=>{ target.classList.add('active'); });
+    el.classList.add('active');
+  }
+  // Init panel display
+  document.querySelectorAll('.panel').forEach(p=>{ if(!p.classList.contains('active')) p.style.display='none'; });
+
+  // ── Papers from Django model ──
+  let papersList = `{% if project.papers %}{{ project.papers|escapejs }}{% endif %}`
+    .split('\n').map(s=>s.trim()).filter(Boolean)
+    .map(s => {
+      const [title, link] = s.split('||');
+      return { title: title || s, link: link || '' };
+    });
+
+  function renderPapers() {
+    document.getElementById('paper-count').textContent = papersList.length;
+    const body = document.getElementById('papers-body');
+    if (!papersList.length) {
+      body.innerHTML = `<div class="empty-state" id="papers-empty">
+        <div class="empty-icon">📄</div>
+        <div class="empty-title">No papers yet</div>
+        <div class="empty-sub">Ask the agent to search arXiv — papers it finds will appear here automatically.</div>
+      </div>`;
+      return;
+    }
+    body.innerHTML = `<div class="papers-grid" id="papers-grid">${
+      papersList.map((p,i) => `
+        <div class="paper-card">
+          <div class="paper-idx">0${i+1}</div>
+          <div class="paper-tag">arXiv Paper</div>
+          <div class="paper-title">${escHtml(p.title)}</div>
+          <div class="paper-excerpt">Fetched and indexed by the LangGraph agent. Available for RAG retrieval during chat sessions.</div>
+          <div class="paper-meta"><span>Indexed</span><span>·</span><span>Project-scoped</span></div>
+          ${p.link ? `<div class="paper-actions"><a href="${escHtml(p.link)}" target="_blank" class="btn-sm" style="font-size:9px;padding:5px 12px;text-decoration:none;">View on arXiv ↗</a></div>` : ''}
+        </div>`).join('')
+    }</div>`;
+  }
+  renderPapers();
+
+  function escHtml(str) {
+    const d=document.createElement('div');d.textContent=str;return d.innerHTML;
+  }
+
+  // configure marked — open links in new tab
+  marked.use({
+    renderer: (() => {
+      const r = new marked.Renderer();
+      r.link = (href, title, text) =>
+        `<a href="${href}" target="_blank" rel="noopener" style="color:var(--sage);text-decoration:underline;">${text}</a>`;
+      return r;
+    })(),
+    breaks: true,
+  });
+
+  // ── Chat ──
+  const messagesEl = document.getElementById('chat-messages');
+  const inputEl    = document.getElementById('chat-input');
+
+  inputEl.addEventListener('keydown', e => {
+    if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height='auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 140)+'px';
+  });
+
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    appendMessage('user', escHtml(text));
+    inputEl.value=''; inputEl.style.height='auto';
+    showTyping();
+
+    const csrf = document.cookie.split(';').map(c=>c.trim())
+      .find(c=>c.startsWith('csrftoken='))?.split('=')[1] || '';
+
+    fetch("{% url 'chat' project.name %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrf },
+      body: 'message=' + encodeURIComponent(text),
+    })
+    .then(r => r.json())
+    .then(data => {
+      removeTyping();
+      if (data.status !== 'ok') {
+        appendMessage('ai', 'Error: ' + escHtml(data.message || 'Something went wrong.'));
+        return;
+      }
+
+      // build sources strip from steps
+      const sources = [];
+      if (data.steps && data.steps.some(s => s.includes('load_arxiv_paper'))) sources.push('arXiv Fetched');
+      if (data.steps && data.steps.some(s => s.includes('search_papers')))    sources.push('RAG Retrieved');
+
+      // show agent trace as a collapsible above the answer
+      let traceHtml = '';
+      if (data.steps && data.steps.length) {
+        traceHtml = `<div class="agent-trace">
+          <div class="trace-toggle" onclick="this.nextElementSibling.classList.toggle('open')">
+            ▸ Agent trace (${data.steps.length} steps)
+          </div>
+          <div class="trace-body">${data.steps.map(s=>`<div class="trace-line">${escHtml(s)}</div>`).join('')}</div>
+        </div>`;
+      }
+
+      appendMessage('ai', traceHtml + marked.parse(data.answer), sources);
+
+      // update papers panel if new ones were found
+      if (data.papers && data.papers.length) {
+        data.papers.forEach(p => {
+          if (!papersList.find(x => x.title === p.title)) papersList.push(p);
+        });
+        renderPapers();
+        // flash the Papers nav badge
+        const badge = document.getElementById('paper-count');
+        badge.style.background = 'var(--rust)';
+        badge.style.color = 'var(--paper)';
+        setTimeout(() => { badge.style.background=''; badge.style.color=''; }, 2000);
+      }
+    })
+    .catch(err => { removeTyping(); appendMessage('ai', 'Network error: ' + err.message); });
+  }
+
+  function appendMessage(role, html, sources=[]) {
+    const meta = role==='user' ? 'You' : 'Arxis Agent · LangGraph';
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.style.animation = 'panel-in 0.4s ease';
+    div.innerHTML = `
+      <div class="msg-meta">${meta}</div>
+      <div class="msg-body">${html}</div>
+      ${sources.length ? `<div class="sources-strip">${sources.map(s=>`<span class="source-tag">${s}</span>`).join('')}</div>` : ''}
+    `;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  let typingEl = null;
+  function showTyping() {
+    typingEl = document.createElement('div');
+    typingEl.className = 'message ai';
+    typingEl.innerHTML = `<div class="msg-meta">Arxis Agent</div><div class="typing-row"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+    messagesEl.appendChild(typingEl);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+  function removeTyping() { if(typingEl){typingEl.remove();typingEl=null;} }
+
+  // ── Notes ──
+  let saveTimer;
+  const notesEl = document.getElementById('notes-editor');
+  const statusEl = document.getElementById('save-status');
+
+  notesEl.addEventListener('input', () => {
+    statusEl.innerHTML = '<div class="saved-dot" style="background:var(--amber)"></div> Unsaved changes...';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveNotes, 3000);
+  });
+
+  function saveNotes() {
+    clearTimeout(saveTimer);
+    statusEl.innerHTML = '<div class="saved-dot" style="background:var(--amber)"></div> Saving...';
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.disabled = true;
+
+    const csrfToken = document.cookie.split(';')
+      .map(c => c.trim())
+      .find(c => c.startsWith('csrftoken='))
+      ?.split('=')[1] || '';
+
+    fetch("{% url 'save_notes' project.name %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': csrfToken,
+      },
+      body: 'notes=' + encodeURIComponent(notesEl.value),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'ok') {
+        statusEl.innerHTML = '<div class="saved-dot"></div> All changes saved';
+      } else {
+        statusEl.innerHTML = '<div class="saved-dot" style="background:var(--rust)"></div> Save failed';
+      }
+    })
+    .catch(() => {
+      statusEl.innerHTML = '<div class="saved-dot" style="background:var(--rust)"></div> Save failed';
+    })
+    .finally(() => {
+      if (saveBtn) saveBtn.disabled = false;
+    });
+  }
+
+  function exportNotes() {
+    const blob = new Blob([notesEl.value], {type:'text/markdown'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '{% if project %}{{ project.name|slugify }}{% else %}notes{% endif %}.md';
+    a.click();
+  }
+
+  function wrapText(before, after) {
+    const start=notesEl.selectionStart, end=notesEl.selectionEnd;
+    const sel=notesEl.value.substring(start,end);
+    const rep=before+sel+after;
+    notesEl.setRangeText(rep,start,end,'select');
+    notesEl.focus();
+    notesEl.dispatchEvent(new Event('input'));
+  }
+
+  function insertLink() {
+    const url=prompt('URL:','https://');
+    if(!url) return;
+    const start=notesEl.selectionStart, end=notesEl.selectionEnd;
+    const sel=notesEl.value.substring(start,end)||'link text';
+    notesEl.setRangeText(`[${sel}](${url})`,start,end,'select');
+    notesEl.focus();
+    notesEl.dispatchEvent(new Event('input'));
+  }
+
+  function refreshArxiv() {
+    // Hook: trigger arXiv search from backend
+    alert('Connect to your FastAPI /api/arxiv/fetch/ endpoint to pull papers.');
+  }
+</script>
+</body>
+</html>
