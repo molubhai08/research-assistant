@@ -11,18 +11,27 @@ def Home(request):
 
 def Proj(request):
     if request.method == 'POST':
-        form = Project(request.POST)
+        mode = request.POST.get('mode', 'new')
 
-        if form.is_valid():
-            name = form.cleaned_data['name']
-
+        if mode == 'existing':
+            name = request.POST.get('existing_name', '').strip()
             try:
                 obj = Projects.objects.get(name=name)
+                return redirect('workplace', name=obj.name)
             except Projects.DoesNotExist:
-                obj = form.save()
+                pass  # fall through to re-render with error
 
-            return redirect('workplace', name=obj.name)
-    else:
-        form = Project()
-    return render(request , "proj.html" , {'form' : form})
+        else:
+            form = Project(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data['name']
+                try:
+                    obj = Projects.objects.get(name=name)
+                except Projects.DoesNotExist:
+                    obj = form.save()
+                return redirect('workplace', name=obj.name)
+
+    existing_projects = Projects.objects.all().values_list('name', flat=True)
+    form = Project()
+    return render(request, 'proj.html', {'form': form, 'existing_projects': existing_projects})
 
