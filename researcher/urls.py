@@ -27,4 +27,6 @@ urlpatterns = [
     path('workplace/<str:name>/save-notes/', SaveNotes, name='save_notes'),
     path('workplace/<str:name>/chat/', ChatView, name='chat'),
     path('workplace/<str:name>/add-paper/', AddPaper, name='add_paper'),
+    path('sign_in/' , signin , name = "signin"),
+    path('sign_out/', signout, name = "signout"),
 ]

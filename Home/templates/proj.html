@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arxis — New Project</title>
+<title>Arxis — Projects</title>
+<meta name="description" content="Create a new research project or open an existing one in the Arxis research assistant.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -27,11 +28,10 @@
     color: var(--paper);
     font-family: 'DM Mono', monospace;
     overflow-x: hidden;
-    cursor: none;
     min-height: 100vh;
   }
 
-  /* Cursor */
+  /* ── Custom cursor ── */
   .cursor {
     width: 12px; height: 12px;
     background: var(--rust);
@@ -52,7 +52,7 @@
     transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
   }
 
-  /* Noise */
+  /* ── Background effects ── */
   body::before {
     content: '';
     position: fixed; inset: 0;
@@ -61,8 +61,6 @@
     z-index: 1000;
     opacity: 0.35;
   }
-
-  /* Radial glow bg */
   body::after {
     content: '';
     position: fixed;
@@ -74,8 +72,6 @@
     pointer-events: none;
     z-index: 0;
   }
-
-  /* Grid background */
   .grid-bg {
     position: fixed; inset: 0;
     background-image:
@@ -87,7 +83,7 @@
     z-index: 0;
   }
 
-  /* NAV */
+  /* ── Nav ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0;
     z-index: 100;
@@ -114,18 +110,20 @@
     0%,100% { transform: scale(1); opacity:1; }
     50% { transform: scale(1.6); opacity:0.6; }
   }
-  .nav-back {
-    font-family: 'DM Mono', monospace;
+  .nav-right {
+    display: flex; align-items: center; gap: 24px;
+  }
+  .nav-link {
     font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
     color: var(--mist); text-decoration: none;
     display: flex; align-items: center; gap: 8px;
-    transition: color 0.2s; cursor: none;
+    transition: color 0.2s;
   }
-  .nav-back:hover { color: var(--paper); }
-  .nav-back svg { transition: transform 0.2s; }
-  .nav-back:hover svg { transform: translateX(-3px); }
+  .nav-link:hover { color: var(--paper); }
+  .nav-link svg { transition: transform 0.2s; }
+  .nav-link:hover svg { transform: translateX(-3px); }
 
-  /* MAIN LAYOUT */
+  /* ── Page layout ── */
   .page-wrapper {
     position: relative; z-index: 2;
     min-height: 100vh;
@@ -134,14 +132,13 @@
     padding-top: 90px;
   }
 
-  /* LEFT — Info panel */
+  /* ── Left info panel ── */
   .info-panel {
-    padding: 80px 64px 80px 64px;
+    padding: 80px 64px;
     display: flex; flex-direction: column; justify-content: center;
     border-right: 1px solid rgba(245,242,235,0.06);
     position: sticky; top: 90px; height: calc(100vh - 90px);
   }
-
   .eyebrow {
     font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
     color: var(--rust); margin-bottom: 28px;
@@ -152,7 +149,6 @@
     content: ''; display: block;
     width: 28px; height: 1px; background: var(--rust);
   }
-
   .panel-title {
     font-family: 'Instrument Serif', serif;
     font-size: clamp(40px, 3.8vw, 58px);
@@ -161,21 +157,16 @@
     opacity: 0; animation: fade-up 0.8s 0.35s ease forwards;
   }
   .panel-title em { font-style: italic; color: var(--rust); }
-
   .panel-desc {
     font-size: 12px; line-height: 1.9; color: var(--mist);
     max-width: 380px; margin-bottom: 48px;
     opacity: 0; animation: fade-up 0.8s 0.5s ease forwards;
   }
-
-  /* Feature bullets */
   .info-features {
     display: flex; flex-direction: column; gap: 20px;
     opacity: 0; animation: fade-up 0.8s 0.65s ease forwards;
   }
-  .info-feat {
-    display: flex; gap: 14px; align-items: flex-start;
-  }
+  .info-feat { display: flex; gap: 14px; align-items: flex-start; }
   .feat-icon {
     width: 32px; height: 32px; flex-shrink: 0;
     border: 1px solid rgba(245,242,235,0.1);
@@ -184,7 +175,6 @@
   }
   .feat-text { font-size: 11px; line-height: 1.7; color: var(--mist); }
   .feat-text strong { color: var(--paper); font-weight: 500; display: block; margin-bottom: 2px; font-size: 12px; }
-
   .step-counter {
     margin-top: 56px;
     padding-top: 40px;
@@ -192,12 +182,8 @@
     display: flex; gap: 6px; align-items: center;
     opacity: 0; animation: fade-up 0.8s 0.8s ease forwards;
   }
-  .step-pip {
-    width: 28px; height: 3px; background: var(--rust);
-  }
-  .step-pip.inactive {
-    background: rgba(245,242,235,0.1);
-  }
+  .step-pip { width: 28px; height: 3px; background: var(--rust); }
+  .step-pip.inactive { background: rgba(245,242,235,0.1); }
   .step-text {
     font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
     color: var(--mist); margin-left: 10px;
@@ -208,13 +194,12 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* RIGHT — Form panel */
+  /* ── Right form panel ── */
   .form-panel {
     padding: 80px 64px;
     display: flex; flex-direction: column; justify-content: center;
     overflow-y: auto;
   }
-
   .form-card {
     background: rgba(16,16,22,0.85);
     border: 1px solid rgba(245,242,235,0.08);
@@ -224,11 +209,11 @@
     animation: card-in 0.9s 0.5s cubic-bezier(0.23,1,0.32,1) forwards;
     box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,79,44,0.06);
   }
-  /* top accent line */
   .form-card::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--rust), var(--amber), transparent);
+    pointer-events: none;
   }
   @keyframes card-in {
     from { opacity:0; transform: translateY(24px); }
@@ -255,44 +240,57 @@
     padding: 5px 10px;
     border: 1px solid rgba(74,124,107,0.4);
     color: var(--sage);
+    transition: all 0.2s;
   }
 
-  /* Form fields */
-  .form-group {
-    margin-bottom: 26px;
-    opacity: 0;
-    animation: fade-up 0.6s ease forwards;
+  /* ── Error banner ── */
+  .error-banner {
+    background: rgba(201,79,44,0.1);
+    border: 1px solid rgba(201,79,44,0.3);
+    color: var(--rust);
+    font-size: 11px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: 0.04em;
   }
-  .form-group:nth-child(1) { animation-delay: 0.7s; }
-  .form-group:nth-child(2) { animation-delay: 0.85s; }
-  .form-group:nth-child(3) { animation-delay: 1.0s; }
-  .form-group:nth-child(4) { animation-delay: 1.15s; }
-  .form-group:nth-child(5) { animation-delay: 1.3s; }
 
+  /* ── Mode toggle ── */
+  .mode-toggle {
+    display: flex; gap: 1px;
+    background: rgba(245,242,235,0.06);
+    margin-bottom: 32px;
+  }
+  .mode-btn {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 11px 16px;
+    border: none; background: transparent;
+    color: var(--mist);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all 0.2s;
+  }
+  .mode-btn.active { background: rgba(201,79,44,0.12); color: var(--rust); }
+  .mode-btn:hover:not(.active) { color: var(--paper); background: rgba(245,242,235,0.04); }
+
+  /* ── Form fields ── */
+  .field-section { transition: opacity 0.2s ease; }
+  .field-section.hidden { display: none; }
+
+  .form-group { margin-bottom: 26px; }
   .form-label {
-    display: block;
+    display: flex;
     font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--mist); margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
+    align-items: center; gap: 8px;
   }
-  .label-required {
-    color: var(--rust); font-size: 14px; line-height: 1;
-  }
+  .label-required { color: var(--rust); font-size: 14px; line-height: 1; }
 
-  /* Universal input styling — targets Django form-rendered inputs */
-  .form-group input[type="text"],
-  .form-group input[type="email"],
-  .form-group input[type="password"],
-  .form-group input[type="number"],
-  .form-group input[type="url"],
-  .form-group input[type="search"],
-  .form-group input[type="date"],
-  .form-group input[type="file"],
-  .form-group textarea,
-  .form-group select,
-  input.arxis-input,
-  textarea.arxis-input,
-  select.arxis-input {
+  .arxis-input {
     width: 100%;
     font-family: 'DM Mono', monospace;
     font-size: 12px;
@@ -302,101 +300,44 @@
     color: var(--paper);
     outline: none;
     transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
-    cursor: text;
     appearance: none;
     -webkit-appearance: none;
   }
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
+  .arxis-input:focus {
     border-color: var(--rust);
     background: rgba(201,79,44,0.04);
     box-shadow: 0 0 0 3px rgba(201,79,44,0.08);
   }
-  .form-group input::placeholder,
-  .form-group textarea::placeholder {
-    color: rgba(138,154,170,0.4);
-  }
-  .form-group textarea {
-    resize: vertical; min-height: 100px;
-  }
-  .form-group select {
+  .arxis-input::placeholder { color: rgba(138,154,170,0.4); }
+
+  select.arxis-input {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a9aaa' stroke-width='1.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
+    background-color: rgba(255,255,255,0.03);
     padding-right: 36px;
-    cursor: none;
+    cursor: pointer;
   }
-  .form-group select option {
-    background: #16161e;
-    color: var(--paper);
-  }
+  select.arxis-input option { background: #16161e; color: var(--paper); }
 
-  /* Django error/help text */
-  .form-group .errorlist {
-    list-style: none;
-    margin-top: 8px;
-    font-size: 10px;
-    color: var(--rust);
-    letter-spacing: 0.05em;
-  }
-  .form-group .helptext,
-  .form-group .help-text {
-    font-size: 10px;
-    color: var(--mist);
-    margin-top: 7px;
-    line-height: 1.6;
-  }
-
-  /* File input special */
-  .form-group input[type="file"] {
-    cursor: none;
-    color: var(--mist);
-    padding: 10px 16px;
-  }
-  .form-group input[type="file"]::file-selector-button {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 6px 14px; margin-right: 14px;
-    background: rgba(201,79,44,0.15);
-    border: 1px solid rgba(201,79,44,0.4);
-    color: var(--rust); cursor: none;
-    transition: background 0.2s;
-  }
-  .form-group input[type="file"]::file-selector-button:hover {
-    background: rgba(201,79,44,0.25);
-  }
-
-  /* Checkbox / Radio */
-  .form-group input[type="checkbox"],
-  .form-group input[type="radio"] {
-    width: 16px; height: 16px;
-    accent-color: var(--rust);
-    cursor: none;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
-
-  /* Form divider */
   .form-divider {
     height: 1px;
     background: rgba(245,242,235,0.07);
     margin: 32px 0;
   }
 
-  /* Submit */
+  /* ── Submit row ── */
   .form-submit-row {
-    display: flex; align-items: center; gap: 20px;
+    display: flex; align-items: center; gap: 16px;
     margin-top: 36px;
-    opacity: 0;
-    animation: fade-up 0.6s 1.4s ease forwards;
   }
   .btn-submit {
     font-family: 'DM Mono', monospace;
     font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
     padding: 15px 36px;
     background: var(--rust); color: var(--paper);
-    border: none; cursor: none;
+    border: none;
+    cursor: pointer;
     position: relative; overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
     flex: 1;
@@ -407,35 +348,33 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
     transform: translateX(-100%);
     transition: transform 0.55s ease;
+    pointer-events: none;
   }
   .btn-submit:hover::after { transform: translateX(100%); }
   .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,79,44,0.35); }
   .btn-submit:active { transform: translateY(0); }
-
-  /* Send icon inside button */
   .btn-submit-inner {
     display: flex; align-items: center; justify-content: center; gap: 10px;
+    pointer-events: none;
   }
-
   .btn-secondary {
     font-family: 'DM Mono', monospace;
     font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
     padding: 15px 24px;
     border: 1px solid rgba(245,242,235,0.12);
     color: var(--mist); background: transparent;
-    cursor: none; transition: all 0.25s;
+    cursor: pointer;
+    transition: all 0.25s;
     white-space: nowrap;
   }
   .btn-secondary:hover { border-color: rgba(245,242,235,0.3); color: var(--paper); }
 
-  /* Progress indicator at bottom of card */
+  /* ── Footer note ── */
   .form-footer {
     margin-top: 28px;
     display: flex; align-items: center; gap: 12px;
     padding-top: 24px;
     border-top: 1px solid rgba(245,242,235,0.06);
-    opacity: 0;
-    animation: fade-up 0.6s 1.5s ease forwards;
   }
   .form-footer-icon {
     width: 24px; height: 24px;
@@ -448,63 +387,9 @@
     color: var(--mist); line-height: 1.6;
   }
 
-  /* Mode toggle */
-  .mode-toggle {
-    display: flex; gap: 1px;
-    background: rgba(245,242,235,0.06);
-    margin-bottom: 32px;
-  }
-  .mode-btn {
-    flex: 1;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
-    padding: 11px 16px;
-    border: none; background: transparent;
-    color: var(--mist); cursor: none;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-    transition: all 0.2s;
-  }
-  .mode-btn.active {
-    background: rgba(201,79,44,0.12);
-    color: var(--rust);
-  }
-  .mode-btn:hover:not(.active) { color: var(--paper); background: rgba(245,242,235,0.04); }
-
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--ink); }
   ::-webkit-scrollbar-thumb { background: var(--rust); }
-
-  /* Django-rendered label tweaks (auto-applied) */
-  label { display: block; }
-
-  /* Wrap Django auto-rendered p tags */
-  form > p { margin-bottom: 24px; }
-  form > p label {
-    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--mist); margin-bottom: 10px;
-  }
-  form > p input,
-  form > p textarea,
-  form > p select {
-    width: 100%;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    padding: 14px 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(245,242,235,0.1);
-    color: var(--paper);
-    outline: none;
-    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
-    appearance: none;
-  }
-  form > p input:focus,
-  form > p textarea:focus,
-  form > p select:focus {
-    border-color: var(--rust);
-    background: rgba(201,79,44,0.04);
-    box-shadow: 0 0 0 3px rgba(201,79,44,0.08);
-  }
 </style>
 </head>
 <body>
@@ -519,27 +404,30 @@
     <div class="logo-dot"></div>
     Arxis
   </a>
-  <a href="/" class="nav-back">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-    </svg>
-    Back to Home
-  </a>
+  <div class="nav-right">
+    <a href="{% url 'signout' %}" class="nav-link">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M5 7h7M9 4l3 3-3 3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M8 2H3a1 1 0 00-1 1v8a1 1 0 001 1h5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
+      Sign Out
+    </a>
+  </div>
 </nav>
 
 <!-- PAGE -->
 <div class="page-wrapper">
 
-  <!-- LEFT INFO PANEL -->
+  <!-- LEFT PANEL -->
   <div class="info-panel">
-    <div class="eyebrow">Step 1 of 2</div>
+    <div class="eyebrow">Research Workspace</div>
     <h1 class="panel-title">
-      Start a new<br>
+      Your<br>
       research<br>
-      <em>project</em>
+      <em>projects</em>
     </h1>
     <p class="panel-desc">
-      Give your project a name and context. Arxis will use this to scope your RAG pipeline, route queries, and keep findings organized across sessions.
+      Create a new project or open an existing one. Each project has its own scoped RAG pipeline, conversation history, and paper collection.
     </p>
 
     <div class="info-features">
@@ -551,7 +439,7 @@
         </div>
         <div class="feat-text">
           <strong>Project-scoped RAG</strong>
-          Your papers are embedded and indexed separately per project for accurate retrieval.
+          Papers are embedded and indexed separately per project for accurate retrieval.
         </div>
       </div>
       <div class="info-feat">
@@ -563,7 +451,7 @@
         </div>
         <div class="feat-text">
           <strong>Persistent sessions</strong>
-          All conversations and saved findings are stored under this project in Firestore.
+          All conversations and saved findings are stored under this project.
         </div>
       </div>
       <div class="info-feat">
@@ -592,57 +480,107 @@
       <div class="form-card-header">
         <div>
           <div class="form-card-title">Project Details</div>
-          <div class="form-card-subtitle">Fill in to initialize your research environment</div>
+          <div class="form-card-subtitle">Select or create your research environment</div>
         </div>
-        <div class="form-badge">New Project</div>
+        <div class="form-badge" id="mode-badge">New Project</div>
       </div>
+
+      <!-- Error display -->
+      {% if error %}
+      <div class="error-banner">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M7 4v3M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        {{ error }}
+      </div>
+      {% endif %}
 
       <!-- Mode toggle -->
       <div class="mode-toggle">
         <button type="button" class="mode-btn active" id="btn-new" onclick="setMode('new')">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
           New Project
         </button>
         <button type="button" class="mode-btn" id="btn-existing" onclick="setMode('existing')">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4h8M2 8h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 4h8M2 8h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
           Open Existing
         </button>
       </div>
 
-      <form method="post" action="{% url 'proj' %}">
+      <!--
+        KEY FIX: Two separate forms. Only one is submitted at a time.
+        This completely avoids the HTML5 required-field validation problem
+        where a hidden required input blocks form submission.
+      -->
+
+      <!-- FORM A: New Project -->
+      <form id="form-new" method="post" action="{% url 'proj' %}">
         {% csrf_token %}
-        <input type="hidden" name="mode" id="mode-input" value="new">
+        <input type="hidden" name="mode" value="new">
 
-        <!-- New project fields -->
-        <div id="new-fields">
-          <div class="form-group">
-            <label class="form-label">Project Name <span class="label-required">*</span></label>
-            {{ form.name }}
-          </div>
-        </div>
-
-        <!-- Existing project picker -->
-        <div id="existing-fields" style="display:none;">
-          <div class="form-group">
-            <label class="form-label">Select Project</label>
-            <select name="existing_name" class="arxis-input">
-              <option value="" disabled selected>— choose a project —</option>
-              {% for name in existing_projects %}
-              <option value="{{ name }}">{{ name }}</option>
-              {% empty %}
-              <option disabled>No projects yet</option>
-              {% endfor %}
-            </select>
-          </div>
+        <div class="form-group">
+          <label class="form-label" for="id_proj_name">
+            Project Name <span class="label-required">*</span>
+          </label>
+          <input
+            type="text"
+            id="id_proj_name"
+            name="name"
+            class="arxis-input"
+            placeholder="e.g. hallucinations-in-llms"
+            autocomplete="off"
+            maxlength="255"
+          >
         </div>
 
         <div class="form-divider"></div>
 
         <div class="form-submit-row">
           <button type="button" class="btn-secondary" onclick="history.back()">Cancel</button>
-          <button type="submit" class="btn-submit">
+          <button type="submit" class="btn-submit" id="submit-new">
             <div class="btn-submit-inner">
-              <span id="submit-label">Create Project</span>
+              <span>Create Project</span>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </button>
+        </div>
+      </form>
+
+      <!-- FORM B: Open Existing -->
+      <form id="form-existing" method="post" action="{% url 'proj' %}" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="existing">
+
+        <div class="form-group">
+          <label class="form-label" for="id_existing_name">Select Project</label>
+          {% if existing_projects %}
+          <select id="id_existing_name" name="existing_name" class="arxis-input" required>
+            <option value="" disabled selected>— choose a project —</option>
+            {% for proj_name in existing_projects %}
+              <option value="{{ proj_name }}">{{ proj_name }}</option>
+            {% endfor %}
+          </select>
+          {% else %}
+          <div style="font-size:11px;color:var(--mist);padding:14px 16px;border:1px solid rgba(245,242,235,0.1);">
+            No projects yet — create one first.
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-submit-row">
+          <button type="button" class="btn-secondary" onclick="history.back()">Cancel</button>
+          <button type="submit" class="btn-submit" id="submit-existing">
+            <div class="btn-submit-inner">
+              <span>Open Project</span>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
               </svg>
@@ -659,7 +597,7 @@
           </svg>
         </div>
         <div class="form-footer-text">
-          Secured by Firebase Auth · All project data is private and project-scoped
+          All project data is private and project-scoped to your account.
         </div>
       </div>
     </div>
@@ -668,53 +606,56 @@
 </div>
 
 <script>
-  // Custom cursor
+  // ── Custom cursor ──────────────────────────────────────────────────────────
   const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
+  const ring   = document.getElementById('cursorRing');
   let mx = 0, my = 0, rx = 0, ry = 0;
 
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursor.style.left = mx - 6 + 'px';
-    cursor.style.top = my - 6 + 'px';
+    cursor.style.top  = my - 6 + 'px';
   });
 
-  function animateRing() {
+  (function animateRing() {
     rx += (mx - rx - 18) * 0.12;
     ry += (my - ry - 18) * 0.12;
     ring.style.left = rx + 'px';
-    ring.style.top = ry + 'px';
+    ring.style.top  = ry + 'px';
     requestAnimationFrame(animateRing);
-  }
-  animateRing();
+  })();
 
-  document.querySelectorAll('button, a, input, textarea, select').forEach(el => {
+  document.querySelectorAll('button, a, input, select').forEach(el => {
     el.addEventListener('mouseenter', () => {
       cursor.style.transform = 'scale(2)';
-      ring.style.transform = 'scale(1.4)';
+      ring.style.transform   = 'scale(1.4)';
       ring.style.borderColor = 'rgba(201,79,44,0.8)';
     });
     el.addEventListener('mouseleave', () => {
       cursor.style.transform = 'scale(1)';
-      ring.style.transform = 'scale(1)';
+      ring.style.transform   = 'scale(1)';
       ring.style.borderColor = 'rgba(201,79,44,0.5)';
     });
   });
 
-  // Apply Arxis styling to Django-auto-rendered fields
-  document.querySelectorAll('form input, form textarea, form select').forEach(el => {
-    el.classList.add('arxis-input');
-  });
-
-  // Mode toggle
+  // ── Mode toggle ────────────────────────────────────────────────────────────
+  // Two completely separate forms — no hidden required fields to trip over.
   function setMode(mode) {
-    document.getElementById('mode-input').value = mode;
-    document.getElementById('new-fields').style.display    = mode === 'new'      ? 'block' : 'none';
-    document.getElementById('existing-fields').style.display = mode === 'existing' ? 'block' : 'none';
-    document.getElementById('btn-new').classList.toggle('active', mode === 'new');
-    document.getElementById('btn-existing').classList.toggle('active', mode === 'existing');
-    document.getElementById('submit-label').textContent = mode === 'new' ? 'Create Project' : 'Open Project';
+    const isNew = mode === 'new';
+
+    document.getElementById('form-new').style.display      = isNew ? 'block' : 'none';
+    document.getElementById('form-existing').style.display = isNew ? 'none'  : 'block';
+
+    document.getElementById('btn-new').classList.toggle('active', isNew);
+    document.getElementById('btn-existing').classList.toggle('active', !isNew);
+
+    document.getElementById('mode-badge').textContent = isNew ? 'New Project' : 'Existing';
   }
+
+  // If the server returned an error for 'existing' mode, restore that tab
+  {% if request.POST.mode == 'existing' %}
+  setMode('existing');
+  {% endif %}
 </script>
 </body>
 </html>

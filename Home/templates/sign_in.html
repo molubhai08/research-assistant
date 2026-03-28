@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arxis — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --cream: #ede9df;
+    --rust: #c94f2c;
+    --amber: #d4943a;
+    --sage: #4a7c6b;
+    --slate: #2c3a4a;
+    --mist: #8a9aaa;
+    --glow: rgba(201, 79, 44, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: none;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--rust);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+    mix-blend-mode: screen;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1px solid rgba(201,79,44,0.5);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: all 0.25s cubic-bezier(0.23,1,0.32,1);
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.35;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,242,235,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,242,235,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Radial glow */
+  .glow-orb {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,79,44,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    transition: left 1.2s ease, top 1.2s ease;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 24px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(245,242,235,0.06);
+    backdrop-filter: blur(12px);
+    background: rgba(10,10,15,0.7);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--paper);
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    cursor: none;
+  }
+  .logo-dot {
+    width: 8px; height: 8px;
+    background: var(--rust); border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { transform: scale(1); opacity:1; }
+    50% { transform: scale(1.6); opacity:0.6; }
+  }
+  .nav-hint {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--mist);
+  }
+  .nav-hint span { color: var(--rust); }
+
+  /* PAGE LAYOUT */
+  .page-wrapper {
+    position: relative; z-index: 2;
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 73px;
+    min-height: 100vh;
+  }
+
+  /* LEFT PANEL — Decorative */
+  .left-panel {
+    position: sticky; top: 73px;
+    height: calc(100vh - 73px);
+    border-right: 1px solid rgba(245,242,235,0.06);
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding: 80px 64px;
+    overflow: hidden;
+  }
+
+  /* Geometric decoration */
+  .geo-decoration {
+    position: absolute;
+    right: -60px; top: 50%;
+    transform: translateY(-50%);
+    width: 280px; height: 280px;
+    border: 1px solid rgba(201,79,44,0.12);
+    transform: translateY(-50%) rotate(15deg);
+    animation: geo-spin 30s linear infinite;
+  }
+  .geo-decoration::before {
+    content: '';
+    position: absolute; inset: 20px;
+    border: 1px solid rgba(201,79,44,0.08);
+    animation: geo-spin 20s linear infinite reverse;
+  }
+  .geo-decoration::after {
+    content: '';
+    position: absolute; inset: 45px;
+    border: 1px solid rgba(201,79,44,0.05);
+  }
+  @keyframes geo-spin {
+    from { transform: translateY(-50%) rotate(15deg); }
+    to   { transform: translateY(-50%) rotate(375deg); }
+  }
+
+  .left-tag {
+    font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--rust);
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+    opacity: 0; animation: fade-up 0.7s 0.1s ease forwards;
+  }
+  .left-tag::before {
+    content: ''; display: block;
+    width: 28px; height: 1px; background: var(--rust);
+  }
+
+  .left-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(38px, 3.5vw, 54px);
+    line-height: 1.08;
+    color: var(--paper);
+    margin-bottom: 28px;
+    opacity: 0; animation: fade-up 0.8s 0.25s ease forwards;
+  }
+  .left-title em { font-style: italic; color: var(--rust); }
+
+  .left-desc {
+    font-size: 11.5px; line-height: 1.9; color: var(--mist);
+    max-width: 360px; margin-bottom: 52px;
+    opacity: 0; animation: fade-up 0.8s 0.4s ease forwards;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: flex; gap: 0;
+    border: 1px solid rgba(245,242,235,0.08);
+    opacity: 0; animation: fade-up 0.8s 0.55s ease forwards;
+  }
+  .stat-item {
+    flex: 1;
+    padding: 20px 24px;
+    border-right: 1px solid rgba(245,242,235,0.08);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 800;
+    color: var(--paper); letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .stat-num span { color: var(--rust); }
+  .stat-label {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--mist);
+  }
+
+  /* Testimonial */
+  .testimonial {
+    margin-top: 40px;
+    padding: 24px 28px;
+    border: 1px solid rgba(245,242,235,0.07);
+    background: rgba(255,255,255,0.015);
+    position: relative;
+    opacity: 0; animation: fade-up 0.8s 0.7s ease forwards;
+  }
+  .testimonial::before {
+    content: '"';
+    position: absolute; top: -14px; left: 20px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 48px; color: var(--rust); line-height: 1;
+  }
+  .testimonial-text {
+    font-size: 11px; line-height: 1.8; color: var(--mist);
+    font-style: italic; margin-bottom: 14px;
+  }
+  .testimonial-author {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--paper);
+  }
+  .testimonial-author span { color: var(--mist); font-size: 9px; }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RIGHT — Auth Panel */
+  .right-panel {
+    padding: 80px 64px;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+  }
+
+  .auth-card {
+    background: rgba(16,16,22,0.9);
+    border: 1px solid rgba(245,242,235,0.08);
+    padding: 48px 44px;
+    position: relative;
+    opacity: 0;
+    animation: card-in 0.9s 0.45s cubic-bezier(0.23,1,0.32,1) forwards;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,79,44,0.06);
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--rust), var(--amber), transparent);
+  }
+  @keyframes card-in {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* Tab toggle */
+  .auth-tabs {
+    display: flex; gap: 1px;
+    background: rgba(245,242,235,0.06);
+    margin-bottom: 36px;
+  }
+  .auth-tab {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 12px 16px;
+    border: none; background: transparent;
+    color: var(--mist); cursor: none;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .auth-tab.active {
+    background: rgba(201,79,44,0.12);
+    color: var(--rust);
+  }
+  .auth-tab:hover:not(.active) { color: var(--paper); background: rgba(245,242,235,0.04); }
+
+  /* Form sections */
+  .auth-section { display: none; }
+  .auth-section.visible { display: block; }
+
+  .section-header {
+    margin-bottom: 30px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(245,242,235,0.07);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px; font-weight: 700;
+    color: var(--paper); letter-spacing: -0.2px;
+  }
+  .section-sub {
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--mist); margin-top: 5px;
+  }
+  .section-badge {
+    font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 5px 10px; flex-shrink: 0;
+    border: 1px solid rgba(74,124,107,0.4);
+    color: var(--sage);
+  }
+
+  /* Form groups */
+  .form-group {
+    margin-bottom: 22px;
+    opacity: 0;
+    animation: fade-up 0.6s ease forwards;
+  }
+  /* stagger delays for sign-in fields */
+  #signin-form .form-group:nth-child(1) { animation-delay: 0.6s; }
+  #signin-form .form-group:nth-child(2) { animation-delay: 0.75s; }
+  #signin-form .form-group:nth-child(3) { animation-delay: 0.9s; }
+  /* stagger delays for sign-up fields */
+  #signup-form .form-group:nth-child(1) { animation-delay: 0.6s; }
+  #signup-form .form-group:nth-child(2) { animation-delay: 0.72s; }
+  #signup-form .form-group:nth-child(3) { animation-delay: 0.84s; }
+  #signup-form .form-group:nth-child(4) { animation-delay: 0.96s; }
+
+  .form-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mist); margin-bottom: 10px;
+  }
+  .label-required { color: var(--rust); font-size: 14px; line-height: 1; }
+
+  .input-wrap {
+    position: relative;
+  }
+  .input-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--mist); pointer-events: none;
+    transition: color 0.2s;
+  }
+  .input-wrap:focus-within .input-icon { color: var(--rust); }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 14px 16px 14px 42px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(245,242,235,0.1);
+    color: var(--paper);
+    outline: none;
+    transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    cursor: text;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input:focus {
+    border-color: var(--rust);
+    background: rgba(201,79,44,0.04);
+    box-shadow: 0 0 0 3px rgba(201,79,44,0.08);
+  }
+  input::placeholder { color: rgba(138,154,170,0.35); }
+
+  /* Password visibility toggle */
+  .pw-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: none;
+    color: var(--mist); padding: 4px;
+    transition: color 0.2s;
+  }
+  .pw-toggle:hover { color: var(--paper); }
+
+  /* Forgot password */
+  .forgot-row {
+    display: flex; justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .forgot-link {
+    font-size: 10px; letter-spacing: 0.08em;
+    color: var(--mist); text-decoration: none;
+    cursor: none; transition: color 0.2s;
+  }
+  .forgot-link:hover { color: var(--rust); }
+
+  /* Password strength */
+  .pw-strength {
+    margin-top: 8px;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .pw-bar {
+    flex: 1; height: 2px;
+    background: rgba(245,242,235,0.08);
+    transition: background 0.3s;
+  }
+  .pw-bar.weak   { background: #c94f2c; }
+  .pw-bar.medium { background: var(--amber); }
+  .pw-bar.strong { background: var(--sage); }
+  .pw-strength-label {
+    font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--mist); white-space: nowrap; margin-left: 8px;
+    transition: color 0.3s;
+  }
+
+  /* Divider */
+  .form-divider {
+    height: 1px;
+    background: rgba(245,242,235,0.07);
+    margin: 28px 0;
+  }
+
+  /* Submit */
+  .submit-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 10px;
+    opacity: 0; animation: fade-up 0.6s ease forwards;
+  }
+  #signin-form .submit-row { animation-delay: 1.0s; }
+  #signup-form .submit-row { animation-delay: 1.06s; }
+
+  .btn-submit {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 15px 28px;
+    background: var(--rust); color: var(--paper);
+    border: none; cursor: none; flex: 1;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-submit::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.55s ease;
+  }
+  .btn-submit:hover::after { transform: translateX(100%); }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,79,44,0.35); }
+  .btn-submit:active { transform: translateY(0); }
+
+  /* OR divider */
+  .or-divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 28px 0 24px;
+    opacity: 0; animation: fade-up 0.6s ease forwards;
+  }
+  #signin-form .or-divider { animation-delay: 1.05s; }
+  #signup-form .or-divider { animation-delay: 1.1s; }
+  .or-line { flex: 1; height: 1px; background: rgba(245,242,235,0.07); }
+  .or-text {
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--mist);
+  }
+
+  /* Passkey / OAuth button */
+  .btn-alt {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 13px 20px;
+    border: 1px solid rgba(245,242,235,0.1);
+    color: var(--mist); background: transparent;
+    cursor: none; transition: all 0.25s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    opacity: 0; animation: fade-up 0.6s ease forwards;
+  }
+  #signin-form .btn-alt { animation-delay: 1.1s; }
+  #signup-form .btn-alt { animation-delay: 1.15s; }
+  .btn-alt:hover { border-color: rgba(245,242,235,0.25); color: var(--paper); background: rgba(245,242,235,0.03); }
+
+  /* Footer */
+  .card-footer {
+    margin-top: 28px;
+    display: flex; align-items: center; gap: 12px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(245,242,235,0.06);
+    opacity: 0; animation: fade-up 0.6s 1.2s ease forwards;
+  }
+  .footer-icon {
+    width: 24px; height: 24px; flex-shrink: 0;
+    border: 1px solid rgba(74,124,107,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--sage);
+  }
+  .footer-text {
+    font-size: 10px; letter-spacing: 0.05em;
+    color: var(--mist); line-height: 1.6;
+  }
+
+  /* Input validation states */
+  .input-wrap.valid input   { border-color: rgba(74,124,107,0.5); }
+  .input-wrap.invalid input { border-color: rgba(201,79,44,0.5); }
+  .input-check {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    font-size: 12px; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .input-wrap.valid .input-check   { opacity: 1; color: var(--sage); }
+  .input-wrap.invalid .input-check { opacity: 1; color: var(--rust); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--rust); }
+
+  /* Error message */
+  .field-error {
+    font-size: 10px; color: var(--rust); margin-top: 7px;
+    letter-spacing: 0.05em; display: none;
+  }
+  .input-wrap.invalid + .field-error { display: block; }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="grid-bg"></div>
+<div class="glow-orb" id="glowOrb" style="left:30%;top:30%;transform:translate(-50%,-50%);"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-dot"></div>
+    Arxis
+  </a>
+  <div class="nav-hint">Research intelligence platform · <span>v2.1</span></div>
+</nav>
+
+<!-- PAGE -->
+<div class="page-wrapper">
+
+  <!-- LEFT DECORATIVE PANEL -->
+  <div class="left-panel">
+    <div class="geo-decoration"></div>
+
+    <div class="left-tag">Research Intelligence</div>
+
+    <h1 class="left-title">
+      Your ideas,<br>
+      <em>deeply</em><br>
+      understood.
+    </h1>
+
+    <p class="left-desc">
+      Arxis connects your research papers to a live intelligence layer — RAG-powered, arXiv-routed, and scoped to your projects.
+    </p>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <div class="stat-num">24<span>K+</span></div>
+        <div class="stat-label">Papers indexed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">98<span>%</span></div>
+        <div class="stat-label">Query accuracy</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">0.3<span>s</span></div>
+        <div class="stat-label">Avg retrieval</div>
+      </div>
+    </div>
+
+    <div class="testimonial">
+      <p class="testimonial-text">Arxis cut my literature review time from weeks to hours. The RAG pipeline actually understands context, not just keywords.</p>
+      <div class="testimonial-author">Dr. S. Mehta <span>· NeurIPS 2024</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT AUTH PANEL -->
+  <div class="right-panel">
+    <div class="auth-card">
+
+      <!-- Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-signin" onclick="switchTab('signin')">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M8 6H2M5 3l-3 3 3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M10 2v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Sign In
+        </button>
+        <button class="auth-tab" id="tab-signup" onclick="switchTab('signup')">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          Create Account
+        </button>
+      </div>
+
+      {% if error %}
+      <div style="font-size:11px;color:var(--rust);padding:10px 14px;border:1px solid rgba(201,79,44,0.3);margin-bottom:20px;">{{ error }}</div>
+      {% endif %}
+
+      <!-- SIGN IN SECTION -->
+      <div id="signin-section" class="auth-section visible">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Welcome back</div>
+            <div class="section-sub">Sign in to your research environment</div>
+          </div>
+          <div class="section-badge">Returning</div>
+        </div>
+
+        <form id="signin-form" method="post" action="{% url 'signin' %}" autocomplete="on">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">
+              Username <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="si-username-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M2 12c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="text" name="username" id="si-username" placeholder="your_username" autocomplete="username" required>
+              <span class="input-check">✓</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Password <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="si-pw-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="3" y="6" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M5 6V4.5a2 2 0 014 0V6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="password" name="password" id="si-password" placeholder="••••••••••" autocomplete="current-password" required>
+              <button type="button" class="pw-toggle" onclick="togglePw('si-password', this)" aria-label="Toggle password visibility">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" class="eye-icon">
+                  <path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.1"/>
+                  <circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.1"/>
+                </svg>
+              </button>
+            </div>
+            <div class="forgot-row">
+              <a href="/auth/forgot/" class="forgot-link">Forgot password?</a>
+            </div>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <div class="submit-row">
+            <button type="submit" class="btn-submit" name="login">
+              Sign In
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="or-divider">
+            <div class="or-line"></div>
+            <div class="or-text">or continue with</div>
+            <div class="or-line"></div>
+          </div>
+
+          <button type="button" class="btn-alt">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="2" y="2" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <rect x="8" y="2" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <rect x="2" y="8" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <path d="M8 10h4M10 8v4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+            </svg>
+            Passkey / SSO
+          </button>
+        </form>
+      </div>
+
+      <!-- SIGN UP SECTION -->
+      <div id="signup-section" class="auth-section">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Create account</div>
+            <div class="section-sub">Join the research intelligence network</div>
+          </div>
+          <div class="section-badge">New User</div>
+        </div>
+
+        <form id="signup-form" method="post" action="{% url 'signin' %}" autocomplete="on">
+          {% csrf_token %}
+          <div class="form-group">
+            <label class="form-label">
+              Username <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="su-username-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="5" r="2.5" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M2 12c0-2.5 2.2-4 5-4s5 1.5 5 4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="text" name="username" id="su-username" placeholder="choose_username" autocomplete="username" required>
+              <span class="input-check">✓</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Email Address <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="su-email-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="1.5" y="3" width="11" height="8" rx="1" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M1.5 4.5L7 8l5.5-3.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="email" name="email" id="su-email" placeholder="you@institution.edu" autocomplete="email" required>
+              <span class="input-check">✓</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Password <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="su-pw-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="3" y="6" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M5 6V4.5a2 2 0 014 0V6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="password" name="password" id="su-password" placeholder="min. 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)">
+              <button type="button" class="pw-toggle" onclick="togglePw('su-password', this)" aria-label="Toggle password">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1 7s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4z" stroke="currentColor" stroke-width="1.1"/>
+                  <circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.1"/>
+                </svg>
+              </button>
+            </div>
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-bar" id="bar1"></div>
+              <div class="pw-bar" id="bar2"></div>
+              <div class="pw-bar" id="bar3"></div>
+              <div class="pw-bar" id="bar4"></div>
+              <span class="pw-strength-label" id="pw-label">—</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              Confirm Password <span class="label-required">*</span>
+            </label>
+            <div class="input-wrap" id="su-pw2-wrap">
+              <span class="input-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <rect x="3" y="6" width="8" height="6" rx="1" stroke="currentColor" stroke-width="1.1"/>
+                  <path d="M5 6V4.5a2 2 0 014 0V6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input type="password" name="password2" id="su-password2" placeholder="repeat password" autocomplete="new-password" required oninput="checkMatch()">
+              <span class="input-check">✓</span>
+            </div>
+            <div class="field-error" id="match-error">Passwords do not match.</div>
+          </div>
+
+          <div class="form-divider"></div>
+
+          <div class="submit-row">
+            <button type="submit" class="btn-submit" id="signup-btn" name = 'signup'>
+              Create Account
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="or-divider">
+            <div class="or-line"></div>
+            <div class="or-text">or continue with</div>
+            <div class="or-line"></div>
+          </div>
+
+          <button type="button" class="btn-alt">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="2" y="2" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <rect x="8" y="2" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <rect x="2" y="8" width="4" height="4" rx="0.5" stroke="currentColor" stroke-width="1.1"/>
+              <path d="M8 10h4M10 8v4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+            </svg>
+            Passkey / SSO
+          </button>
+        </form>
+      </div>
+
+      <!-- Card footer -->
+      <div class="card-footer">
+        <div class="footer-icon">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 2a4 4 0 100 8A4 4 0 006 2z" stroke="currentColor" stroke-width="1.1"/>
+            <path d="M5 5.5l1 1 2-2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="footer-text">
+          Secured by Firebase Auth · All data is project-scoped and private
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── Custom Cursor ── */
+  const cursor = document.getElementById('cursor');
+  const ring   = document.getElementById('cursorRing');
+  const glow   = document.getElementById('glowOrb');
+  let mx=0, my=0, rx=0, ry=0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx - 6 + 'px';
+    cursor.style.top  = my - 6 + 'px';
+    // Move glow orb lazily toward cursor
+    glow.style.left = mx + 'px';
+    glow.style.top  = my + 'px';
+  });
+
+  function animateRing() {
+    rx += (mx - rx - 18) * 0.12;
+    ry += (my - ry - 18) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top  = ry + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('button, a, input').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'scale(2)';
+      ring.style.transform   = 'scale(1.4)';
+      ring.style.borderColor = 'rgba(201,79,44,0.8)';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'scale(1)';
+      ring.style.transform   = 'scale(1)';
+      ring.style.borderColor = 'rgba(201,79,44,0.5)';
+    });
+  });
+
+  /* ── Tab Switch ── */
+  function switchTab(tab) {
+    const isSignin = tab === 'signin';
+
+    document.getElementById('tab-signin').classList.toggle('active', isSignin);
+    document.getElementById('tab-signup').classList.toggle('active', !isSignin);
+
+    document.getElementById('signin-section').classList.toggle('visible', isSignin);
+    document.getElementById('signup-section').classList.toggle('visible', !isSignin);
+
+    // Re-trigger animations by re-attaching form groups
+    const form = isSignin
+      ? document.getElementById('signin-form')
+      : document.getElementById('signup-form');
+
+    form.querySelectorAll('.form-group, .submit-row, .or-divider, .btn-alt').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth; // reflow
+      el.style.animation = '';
+    });
+  }
+
+  /* ── Password Visibility ── */
+  function togglePw(id, btn) {
+    const inp = document.getElementById(id);
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    btn.querySelector('svg').style.opacity = isHidden ? '0.5' : '1';
+  }
+
+  /* ── Password Strength ── */
+  function checkStrength(val) {
+    const bars   = ['bar1','bar2','bar3','bar4'];
+    const label  = document.getElementById('pw-label');
+    let score = 0;
+    if (val.length >= 8)               score++;
+    if (/[A-Z]/.test(val))             score++;
+    if (/[0-9]/.test(val))             score++;
+    if (/[^A-Za-z0-9]/.test(val))      score++;
+
+    const levels = [
+      { cls: '', text: '—' },
+      { cls: 'weak',   text: 'Weak' },
+      { cls: 'medium', text: 'Fair' },
+      { cls: 'strong', text: 'Strong' },
+      { cls: 'strong', text: 'Excellent' },
+    ];
+    const lvl = levels[score];
+
+    bars.forEach((b, i) => {
+      const el = document.getElementById(b);
+      el.className = 'pw-bar';
+      if (i < score) el.classList.add(lvl.cls);
+    });
+
+    label.textContent = val.length ? lvl.text : '—';
+    label.style.color = score <= 1 ? 'var(--rust)' : score === 2 ? 'var(--amber)' : 'var(--sage)';
+  }
+
+  /* ── Password Match ── */
+  function checkMatch() {
+    const pw  = document.getElementById('su-password').value;
+    const pw2 = document.getElementById('su-password2').value;
+    const wrap = document.getElementById('su-pw2-wrap');
+    if (pw2.length === 0) { wrap.className = 'input-wrap'; return; }
+    if (pw === pw2) {
+      wrap.className = 'input-wrap valid';
+    } else {
+      wrap.className = 'input-wrap invalid';
+    }
+  }
+
+  /* ── Inline validation on blur ── */
+  function validateOnBlur(inputId, wrapId, validator) {
+    const inp  = document.getElementById(inputId);
+    const wrap = document.getElementById(wrapId);
+    inp.addEventListener('blur', () => {
+      if (!inp.value) { wrap.className = 'input-wrap'; return; }
+      wrap.className = 'input-wrap ' + (validator(inp.value) ? 'valid' : 'invalid');
+    });
+    inp.addEventListener('input', () => {
+      if (wrap.classList.contains('invalid') || wrap.classList.contains('valid')) {
+        wrap.className = 'input-wrap ' + (validator(inp.value) ? 'valid' : 'invalid');
+      }
+    });
+  }
+
+  validateOnBlur('si-username', 'si-username-wrap', v => v.length >= 3);
+  validateOnBlur('su-username', 'su-username-wrap', v => /^[a-zA-Z0-9_]{3,}$/.test(v));
+  validateOnBlur('su-email',    'su-email-wrap',    v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+</script>
+</body>
+</html>

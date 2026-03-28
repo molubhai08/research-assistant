@@ -16,15 +16,19 @@ from langchain_core.messages import HumanMessage, AIMessage
 _histories: dict[str, list] = {}
 
 
+from django.contrib.auth.decorators import login_required
+
+
+@login_required(login_url='/sign_in/')
 def WorkPlace(request, name):
-    project = Projects.objects.get(name=name)
+    project = Projects.objects.get(name=name , user = request.user)
     return render(request, 'workplace.html', {'project': project})
 
 
 @require_POST
 def SaveNotes(request, name):
     try:
-        project = Projects.objects.get(name=name)
+        project = Projects.objects.get(name=name , user = request.user)
         project.proj_notes = request.POST.get('notes', '')
         project.save()
         return JsonResponse({'status': 'ok'})
@@ -35,7 +39,7 @@ def SaveNotes(request, name):
 @require_POST
 def ChatView(request, name):
     try:
-        project = Projects.objects.get(name=name)
+        project = Projects.objects.get(name=name , user = request.user)
     except Projects.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Project not found'}, status=404)
 
@@ -79,7 +83,7 @@ def ChatView(request, name):
 @require_POST
 def AddPaper(request, name):
     try:
-        project = Projects.objects.get(name=name)
+        project = Projects.objects.get(name=name , user = request.user)
     except Projects.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Project not found'}, status=404)
 
