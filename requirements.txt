@@ -1,0 +1,26 @@
+# Core Framework
+Django>=4.2.0
+
+# LLM and Agent Frameworks
+langchain-groq
+langchain-community
+langchain-core
+langchain-text-splitters
+langgraph
+
+# Data Processing and Vector Store (Local TF-IDF)
+scikit-learn
+numpy
+pymupdf
+arxiv
+
+# Utilities
+python-dotenv
+requests
+
+# Azure / Production Deployment
+gunicorn
+whitenoise
+psycopg2-binary  # For Azure Database for PostgreSQL
+azure-storage-blob
+azure-identity
