@@ -686,7 +686,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="eyebrow">LangGraph × Azure × arXiv</div>
+    <div class="eyebrow">LangGraph × Groq × arXiv</div>
     <h1 class="hero-title">
       Intelligence that<br>
       reads what you<br>
@@ -819,8 +819,8 @@
           <path d="M10 6v4l3 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="feature-name">RAG over Project Papers</div>
-      <div class="feature-desc">Papers are chunked, embedded with Azure OpenAI, and indexed in Azure AI Search with per-project scoping for accurate, contextual retrieval.</div>
+      <div class="feature-name">Local TF-IDF RAG</div>
+      <div class="feature-desc">Papers are chunked and indexed locally using a high-speed TF-IDF vector store with per-project scoping for accurate, contextual retrieval.</div>
     </div>
     <div class="feature-card">
       <div class="feature-num">03</div>
@@ -843,7 +843,7 @@
         </svg>
       </div>
       <div class="feature-name">Persistent Projects</div>
-      <div class="feature-desc">Firestore stores your projects, chat histories, and saved research findings. Every session is stateful and continuous across time.</div>
+      <div class="feature-desc">SQLite and Django ORM store your projects, chat histories, and saved research findings. Every session is stateful and project-scoped.</div>
     </div>
     <div class="feature-card">
       <div class="feature-num">05</div>
@@ -854,7 +854,7 @@
         </svg>
       </div>
       <div class="feature-name">Secure Authentication</div>
-      <div class="feature-desc">Firebase Authentication guards every request through the FastAPI backend—your research data stays private and project-scoped.</div>
+      <div class="feature-desc">Standard Django Authentication guards every request through the back end—your research data stays private and project-scoped.</div>
     </div>
     <div class="feature-card">
       <div class="feature-num">06</div>
@@ -906,7 +906,7 @@
           <path d="M11 7v4l3 3" stroke="var(--amber)" stroke-width="1.2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="step-label">Azure AI<br>Search RAG</div>
+      <div class="step-label">Local TF-IDF<br>Search RAG</div>
     </div>
     <div class="pipeline-arrow"></div>
     <div class="pipeline-step">
@@ -936,7 +936,7 @@
           <path d="M17 11l3-3v6l-3-3z" fill="var(--sage)"/>
         </svg>
       </div>
-      <div class="step-label">Firestore<br>Persist</div>
+      <div class="step-label">SQLite<br>Persist</div>
     </div>
   </div>
 </section>
@@ -955,23 +955,23 @@
     </div>
     <div class="tech-item">
       <div class="tech-logo">⚡</div>
-      <div class="tech-name">FastAPI</div>
+      <div class="tech-name">Django</div>
       <div class="tech-role">Backend API</div>
     </div>
     <div class="tech-item">
       <div class="tech-logo">☁️</div>
-      <div class="tech-name">Azure OpenAI</div>
-      <div class="tech-role">Embeddings & LLM</div>
+      <div class="tech-name">Groq / Llama 3.1</div>
+      <div class="tech-role">LLM Inference</div>
     </div>
     <div class="tech-item">
       <div class="tech-logo">🔍</div>
-      <div class="tech-name">Azure AI Search</div>
-      <div class="tech-role">Vector Index</div>
+      <div class="tech-name">TF-IDF</div>
+      <div class="tech-role">Local Vector Index</div>
     </div>
     <div class="tech-item">
       <div class="tech-logo">🔥</div>
-      <div class="tech-name">Firebase</div>
-      <div class="tech-role">Auth + Firestore</div>
+      <div class="tech-name">SQLite</div>
+      <div class="tech-role">Auth + DB</div>
     </div>
     <div class="tech-item">
       <div class="tech-logo">📄</div>
@@ -1001,7 +1001,7 @@
     <li><a href="#">API</a></li>
     <li><a href="#">Privacy</a></li>
   </ul>
-  <div class="footer-note">Built with LangGraph × Azure × Firebase</div>
+  <div class="footer-note">Built with LangGraph × Groq × Django</div>
 </footer>
 
 <script>

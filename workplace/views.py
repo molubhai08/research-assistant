@@ -55,7 +55,7 @@ def ChatView(request, name):
 
     # update in-memory history
     history.append(HumanMessage(content=message))
-    history.append(AIMessage(content=result['answer']))
+    history.extend(result.get('new_messages', []))
     _histories[name] = history
 
     # persist any newly found papers to the project

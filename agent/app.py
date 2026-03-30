@@ -1,8 +1,8 @@
 """
 LangGraph Research Assistant Agent — Groq + TF-IDF RAG
 =======================================================
-Azure-friendly: no sentence-transformer model, no GPU, ~5 MB RAM for the index.
-Runs on Azure Functions (Consumption) or the smallest Container Apps SKU.
+Lightweight and fast: no sentence-transformer model, no GPU, ~5 MB RAM for the index.
+Designed for low-resource environments and rapid cold-starts.
 
 Dependencies (requirements.txt):
     langchain-groq
@@ -398,7 +398,13 @@ def ask(question: str, history: list[BaseMessage] | None = None) -> dict:
         papers_this_run.append({"title": title, "link": link})
 
     answer = all_msgs[-1].content
-    return {"answer": answer, "steps": steps, "papers": papers_this_run}
+    new_messages = all_msgs[len(msgs):]
+    return {
+        "answer": answer,
+        "steps": steps,
+        "papers": papers_this_run,
+        "new_messages": new_messages
+    }
 
 
 
@@ -446,5 +452,5 @@ if __name__ == "__main__":
                 print(f"  {i}. {p}")
             print("─────────────────────────────────────────")
 
-        history.append(AIMessage(content=result["answer"]))
+        history.extend(result.get("new_messages", []))
         print(f"\nAssistant: {result['answer']}\n")

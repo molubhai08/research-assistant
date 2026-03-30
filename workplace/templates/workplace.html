@@ -322,7 +322,11 @@
   }
   .paper-excerpt {
     font-size:11px;line-height:1.7;color:var(--mist);
-    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    line-clamp: 3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
     margin-bottom:16px;
   }
   .paper-meta {
@@ -548,7 +552,7 @@
             </span>
             Research Chat
           </div>
-          <div class="panel-sub">RAG · arXiv · LangGraph Agent</div>
+          <div class="panel-sub">RAG · arXiv · Groq Agent</div>
         </div>
         <div class="panel-actions">
           <button class="btn-sm">Clear History</button>
@@ -955,7 +959,7 @@
 
   function refreshArxiv() {
     // Hook: trigger arXiv search from backend
-    alert('Connect to your FastAPI /api/arxiv/fetch/ endpoint to pull papers.');
+    alert('Paper retrieval triggered through the Django backend.');
   }
 </script>
 </body>
