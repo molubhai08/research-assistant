@@ -691,7 +691,7 @@
       An agentic research assistant that retrieves, reasons, and responds—routing every query through RAG pipelines, live arXiv searches, and its own knowledge to surface exactly what you're looking for.
     </p>
     <div class="hero-actions">
-      <button class="btn-primary">Launch Assistant</button>
+      <a href = "{% url 'signin' %}"><button class="btn-primary">Launch Assistant</button></a>
     </div>
     <div class="hero-stats">
       <div>
@@ -975,10 +975,10 @@
   <h2 class="cta-title">Your research,<br><em>amplified</em></h2>
   <p class="cta-sub">Stop searching. Start understanding. Arxis routes every question to the right source so your thinking stays uninterrupted.</p>
   <div class="cta-buttons">
-    <button class="btn-primary" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:16px 40px;background:var(--rust);color:var(--paper);border:none;cursor:none;">
+    <a href = "{% url 'signin' %}"><button class="btn-primary" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:16px 40px;background:var(--rust);color:var(--paper);border:none;cursor:none;">
       Begin Your First Project
-    </button>
-    <a><button class="nav-cta" style="padding:16px 32px;">Read the Docs</button></a>
+    </button></a>
+    <a href = "https://github.com/molubhai08/research-assistant"><button class="nav-cta" style="padding:16px 32px;">Read the Docs</button></a>
   </div>
 </section>
 
