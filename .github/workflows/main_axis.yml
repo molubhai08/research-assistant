@@ -35,6 +35,7 @@ jobs:
           source antenv/bin/activate
           python manage.py collectstatic --noinput
         env:
+          SECRET: ${{ secrets.SECRET }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
       - name: Upload artifact for deployment jobs
